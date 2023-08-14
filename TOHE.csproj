@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+	<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <Description>Town Of Host Edited K</Description>
+    <Authors>KARPED1EM,K</Authors>
+    <langVersion>latest</langVersion>
+	<AmongUs>C:\Program Files (x86)\Steam\steamapps\common\Among Us\BepInEx</AmongUs>
+  <AssemblyName>TOHEK</AssemblyName>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include=".\Resources\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\ModNews\English\TOHE.v.2.4.2.txt"/>
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.7.11" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
+		<PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <IncludeAssets>runtime; compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="csv" Version="2.0.93" />
+    <PackageReference Include="GitInfo" Version="2.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Release'"/>
+  </Target>
+</Project>
