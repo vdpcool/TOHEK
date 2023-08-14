@@ -1,0 +1,6 @@
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\GitInfo.cache
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\TOHE.csproj.AssemblyReference.cache
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\TOHE.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\TOHE.AssemblyInfoInputs.cache
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\TOHE.AssemblyInfo.cs
+C:\Users\vuduy\Downloads\TOHE-Restored\obj\Debug\net6.0\net6.0\TOHE.csproj.CoreCompileInputs.cache
