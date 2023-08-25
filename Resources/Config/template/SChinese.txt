@@ -1,0 +1,3 @@
+welcome：★ 欢迎！ 该大厅正在托管 mod <#ffc0cb>TOHE-K</color> v{{ModVersion}}\n○ 查看网站了解更多信息：<#5865f2><u>https://toher.vercel.app/</u></color>\n● /help → 显示所有命令
+OnMeeting:● QQ群：134830517\n○ 下MOD玩MOD都可以来凑凑热闹\n○ 职业介绍&安装教程都在官网：<#5865f2><u>https://toher.vercel.app/</u></color>\n————————————————————\n★ 输入：/r → 显示所有职业\n★ 输入：/r [职业名] → 某职业的介绍\n★ 输入：/m → 您职业的介绍
+qq:关于群：\n● Q群：134830517\n○ 下MOD玩MOD都可以来凑凑热闹

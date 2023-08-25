@@ -1,0 +1,2 @@
+welcome:★ Welcome! This lobby is hosting mod <#ffc0cb>TOHE-K</color> v{{ModVersion}}\n○ Check website for more info：<#5865f2><u>https://toher.vercel.app/</u></color>\n● /help → Show all commands
+OnMeeting:● Discord: <#5865f2><u>https://discord.gg/tohe</u></color>\n○ Website：<#5865f2><u>https://toher.vercel.app/</u></color>\n————————————————————\n★ Send：/r → Shows rolelist\n★ Send：/r [role] → Show role description \n★ Send：/m → Check your role
