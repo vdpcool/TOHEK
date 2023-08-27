@@ -108,6 +108,6 @@ public static class Succubus
     public static bool CanBeCharmed(this PlayerControl pc)
     {
         return pc != null && (pc.GetCustomRole().IsCrewmate() || pc.GetCustomRole().IsImpostor() || 
-            (CanCharmNeutral.GetBool() && (pc.GetCustomRole().IsNeutral() || pc.GetCustomRole().IsNeutralKilling()))) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Loyal) && !pc.Is(CustomRoles.Captain) && !pc.Is(CustomRoles.Solicited) && !pc.Is(CustomRoles.seniormanagement) && !pc.Is(CustomRoles.Believer);
+            (CanCharmNeutral.GetBool() && (pc.GetCustomRole().IsNeutral() || pc.GetCustomRole().IsNeutralKilling()))) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Loyal) && !pc.Is(CustomRoles.Captain) && !pc.Is(CustomRoles.Solicited) && !pc.Is(CustomRoles.Seniormanagement) && !pc.Is(CustomRoles.Believer);
     }
 }

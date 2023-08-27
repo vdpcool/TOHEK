@@ -169,6 +169,6 @@ public static class Jackal
 
     public static bool CanBeSidekick(this PlayerControl pc)
     {
-        return pc != null && !pc.Is(CustomRoles.Sidekick) && !pc.Is(CustomRoles.Loyal) && !pc.Is(CustomRoles.Rascal) && !pc.Is(CustomRoles.Madmate) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Infected) && !pc.Is(CustomRoles.Contagious) && !pc.Is(CustomRoles.Captain) && !pc.Is(CustomRoles.Solicited) && !pc.Is(CustomRoles.seniormanagement) && !pc.Is(CustomRoles.Believer) && pc.GetCustomRole().IsAbleToBeSidekicked();
+        return pc != null && !pc.Is(CustomRoles.Sidekick) && !pc.Is(CustomRoles.Loyal) && !pc.Is(CustomRoles.Rascal) && !pc.Is(CustomRoles.Madmate) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Infected) && !pc.Is(CustomRoles.Contagious) && !pc.Is(CustomRoles.Captain) && !pc.Is(CustomRoles.Solicited) && !pc.Is(CustomRoles.Seniormanagement) && !pc.Is(CustomRoles.Believer) && pc.GetCustomRole().IsAbleToBeSidekicked();
     }
 }
