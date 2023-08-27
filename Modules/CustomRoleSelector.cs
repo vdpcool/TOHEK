@@ -357,11 +357,22 @@ internal class CustomRoleSelector
         }
         
         {
-          /*  if (!rolesToAssign.Contains(CustomRoles.Lovers) && rolesToAssign.Contains(CustomRoles.FFF) || !rolesToAssign.Contains(CustomRoles.Ntr) && rolesToAssign.Contains(CustomRoles.FFF))
+            /*  if (!rolesToAssign.Contains(CustomRoles.Lovers) && rolesToAssign.Contains(CustomRoles.FFF) || !rolesToAssign.Contains(CustomRoles.Ntr) && rolesToAssign.Contains(CustomRoles.FFF))
                 rolesToAssign.Remove(CustomRoles.FFF); 
                 rolesToAssign.Add(CustomRoles.Jester); */
-
         }
+
+        if (Romantic.IsEnable)
+        {
+            if (rolesToAssign.Contains(CustomRoles.Romantic))
+            {
+            if (rolesToAssign.Contains(CustomRoles.Lovers))
+                rolesToAssign.Remove(CustomRoles.Lovers);
+            if (rolesToAssign.Contains(CustomRoles.Ntr))
+                rolesToAssign.Remove(CustomRoles.Ntr);
+            }
+        }
+
      /*   if (!Options.DisableSaboteur.GetBool()) // no longer hidden
         {
             if (rd.Next(0, 100) < 25 && rolesToAssign.Remove(CustomRoles.Inhibitor)) rolesToAssign.Add(CustomRoles.Saboteur);

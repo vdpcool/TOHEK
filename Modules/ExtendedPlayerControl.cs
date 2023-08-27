@@ -470,14 +470,20 @@ static class ExtendedPlayerControl
             CustomRoles.Guide => !pc.IsAlive(),
             CustomRoles.SourcePlague => pc.IsAlive(),
             CustomRoles.PlaguesGod => pc.IsAlive(),
-            CustomRoles.ImpostorSchrodingerCat => pc.IsAlive(),
-            CustomRoles.GamerSchrodingerCat => pc.IsAlive(),
-            CustomRoles.BloodSchrodingerCat => pc.IsAlive(),
-            CustomRoles.JSchrodingerCat => pc.IsAlive(),
-            CustomRoles.YLSchrodingerCat => pc.IsAlive(),
-            CustomRoles.PGSchrodingerCat => pc.IsAlive(),
-            CustomRoles.DHSchrodingerCat => pc.IsAlive(),
-            CustomRoles.OKSchrodingerCat => pc.IsAlive(),
+            CustomRoles.Banshee => pc.IsAlive(),
+            CustomRoles.Necromancer => pc.IsAlive(),
+            CustomRoles.Seeker => pc.IsAlive(),
+            CustomRoles.SpecialAgent => false,
+            CustomRoles.SpeedUp => pc.IsAlive(),
+            CustomRoles.Romantic => pc.IsAlive(),
+            CustomRoles.RuthlessRomantic => pc.IsAlive(),
+            CustomRoles.VengefulRomantic => VengefulRomantic.CanUseKillButton(pc),
+            CustomRoles.Refugee => pc.IsAlive(),
+            CustomRoles.PlagueDoctor => pc.IsAlive(),
+            CustomRoles.Yandere => pc.IsAlive(),
+            CustomRoles.Fake => pc.IsAlive(),
+            CustomRoles.SchrodingerCat => !SchrodingerCat.noteam,
+            CustomRoles.RewardOfficer => pc.IsAlive(),
             CustomRoles.Pelican => pc.IsAlive(),
             CustomRoles.Arsonist => !pc.IsDouseDone(),
             CustomRoles.Revolutionist => !pc.IsDrawDone(),
@@ -554,6 +560,13 @@ static class ExtendedPlayerControl
             CustomRoles.BSR or
             CustomRoles.SourcePlague or
             CustomRoles.Crush or
+            CustomRoles.SpecialAgent or
+            CustomRoles.SpeedUp or
+            CustomRoles.Romantic or
+            CustomRoles.PlagueDoctor or
+            CustomRoles.Yandere or
+            CustomRoles.Fake or
+            CustomRoles.RewardOfficer or
             CustomRoles.DarkHide or
             CustomRoles.Monarch or
             CustomRoles.Provocateur or
@@ -587,6 +600,10 @@ static class ExtendedPlayerControl
             CustomRoles.YinLang => YinLang.YLCanVent.GetBool(),
             CustomRoles.CovenLeader => CovenLeader.CanVent.GetBool(),
             CustomRoles.PlaguesGod => Options.PlaguesGodCanVent.GetBool(),
+            CustomRoles.Banshee => Banshee.CanVent.GetBool(),
+            CustomRoles.Necromancer => Options.NecromancerCanVent.GetBool(),
+            CustomRoles.VengefulRomantic => Romantic.VengefulCanVent.GetBool(),
+            CustomRoles.RuthlessRomantic => Romantic.RuthlessCanVent.GetBool(),
             CustomRoles.PlatonicLover => false,
             CustomRoles.Swapper => false,
             CustomRoles.HexMaster => true,
@@ -595,6 +612,7 @@ static class ExtendedPlayerControl
             CustomRoles.Captain => true,
             CustomRoles.ET => true,
             CustomRoles.King => true,
+            CustomRoles.Refugee => true,
          //   CustomRoles.Chameleon => true,
 
             CustomRoles.Arsonist => pc.IsDouseDone(),
@@ -657,7 +675,9 @@ static class ExtendedPlayerControl
             CustomRoles.PlagueBearer or
             CustomRoles.Pestilence or
             CustomRoles.Spiritcaller or
-            CustomRoles.CovenLeader
+            CustomRoles.CovenLeader or
+            CustomRoles.Banshee or
+            CustomRoles.Necromancer
             => false,
 
             CustomRoles.Jackal => Jackal.CanUseSabotage.GetBool(),
@@ -665,7 +685,7 @@ static class ExtendedPlayerControl
             CustomRoles.Traitor => Traitor.CanUseSabotage.GetBool(),
             CustomRoles.Parasite => true,
             CustomRoles.Glitch => true,
-            
+            CustomRoles.Refugee => true,
 
             _ => pc.Is(CustomRoleTypes.Impostor),
         };
@@ -743,7 +763,7 @@ static class ExtendedPlayerControl
                 break;
             case CustomRoles.Prophet:
                 Prophet.SetKillCooldown(player.PlayerId);
-               break;
+                break;
             case CustomRoles.ChiefOfPolice:
                 ChiefOfPolice.SetKillCooldown(player.PlayerId);
                 break;
@@ -764,6 +784,39 @@ static class ExtendedPlayerControl
                 break;
             case CustomRoles.BSR:
                 BSR.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.Banshee:
+                Banshee.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.Seeker:
+                Seeker.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.SpeedUp:
+                SpeedUp.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.Romantic:
+                Romantic.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.VengefulRomantic:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Romantic.VengefulKCD.GetFloat();
+                break;
+            case CustomRoles.RuthlessRomantic:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Romantic.RuthlessKCD.GetFloat();
+                break;
+            case CustomRoles.Refugee:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Options.RefugeeKillCD.GetFloat();
+                break;
+            case CustomRoles.PlagueDoctor:
+                PlagueDoctor.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.Yandere:
+                Yandere.SetKillCooldown(player.PlayerId);
+                break;
+            case CustomRoles.Fake:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Options.FakeKillColldown.GetInt();
+                break;
+            case CustomRoles.RewardOfficer:
+                Main.AllPlayerKillCooldown[player.PlayerId] = 1f;
                 break;
             case CustomRoles.Ritualist:
                 Ritualist.SetKillCooldown(player.PlayerId);
@@ -831,6 +884,15 @@ static class ExtendedPlayerControl
                 break;
             case CustomRoles.Crush:
                 Main.AllPlayerKillCooldown[player.PlayerId] = 1f;
+                break;
+            case CustomRoles.Hemophobia:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Options.HemophobiaKillColldown.GetInt();
+                break;
+            case CustomRoles.Necromancer:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Options.NecromancerKillCD.GetFloat();
+                break;
+            case CustomRoles.Fraudster:
+                Main.AllPlayerKillCooldown[player.PlayerId] = Options.FraudsterKillCooldown.GetFloat();
                 break;
             case CustomRoles.Jackal:
           //case CustomRoles.Sidekick:

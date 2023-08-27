@@ -2,6 +2,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,9 @@ using TOHE.Roles.AddOns.Impostor;
 using TOHE.Roles.Crewmate;
 using TOHE.Roles.Impostor;
 using TOHE.Roles.Neutral;
+using UnityEngine;
 using static TOHE.Translator;
+
 namespace TOHE;
 
 enum CustomRPC
@@ -46,6 +49,8 @@ enum CustomRPC
     SetCurrentDousingTarget,
     SetEvilTrackerTarget,
     SetRealKiller,
+    SetYandereTarget,
+    RemoveYandereTarget,
 
     // TOHE
     AntiBlackout,
@@ -115,6 +120,14 @@ enum CustomRPC
     SetScoutSellLimit,
     SetQSRSellLimit,
     SetElectLimlit,
+    SetBansheeTimer,
+    NecromancerRevenge,
+    SetSeekerTarget,
+    SetSeekerPoints,
+    SyncRomanticTarget,
+    SyncVengefulRomanticTarget,
+    SetInfect,
+    SetYandereArrow,
 
     //热土豆没RPC卡死了
     SyncHPPlayer,
@@ -139,7 +152,7 @@ public enum Sounds
 internal class RPCHandlerPatch
 {
     public static bool TrustedRpc(byte id)
-    => (CustomRPC)id is CustomRPC.VersionCheck or CustomRPC.RequestRetryVersionCheck or CustomRPC.AntiBlackout or CustomRPC.Judge or CustomRPC.MeetingKill or CustomRPC.Guess or CustomRPC.MafiaRevenge or CustomRPC.RetributionistRevenge;
+    => (CustomRPC)id is CustomRPC.VersionCheck or CustomRPC.RequestRetryVersionCheck or CustomRPC.AntiBlackout or CustomRPC.Judge or CustomRPC.MeetingKill or CustomRPC.Guess or CustomRPC.MafiaRevenge or CustomRPC.RetributionistRevenge or CustomRPC.NecromancerRevenge;
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
     {
         var rpcType = (RpcCalls)callId;
@@ -321,6 +334,12 @@ internal class RPCHandlerPatch
                 break;
             case CustomRPC.setPlaguedPlayer:
                 PlagueBearer.ReceiveRPC(reader);
+                break;
+            case CustomRPC.SyncRomanticTarget:
+                Romantic.ReceiveRPC(reader);
+                break;
+            case CustomRPC.SyncVengefulRomanticTarget:
+                VengefulRomantic.ReceiveRPC(reader);
                 break;
             case CustomRPC.SetDousedPlayer:
                 byte ArsonistId = reader.ReadByte();
@@ -591,7 +610,7 @@ internal class RPCHandlerPatch
                 break;
             case CustomRPC.SetProphetSellLimit:
                 Prophet.ReceiveRPC(reader);
-               break;
+                break;
             case CustomRPC.SetPoliceLimlit:
                 ChiefOfPolice.ReceiveRPC(reader);
                 break;
@@ -604,6 +623,27 @@ internal class RPCHandlerPatch
             case CustomRPC.SetElectLimlit:
                 ElectOfficials.ReceiveRPC(reader);
                 break;
+            case CustomRPC.SetBansheeTimer:
+                Banshee.ReceiveRPC(reader);
+                break;
+            case CustomRPC.NecromancerRevenge:
+                NecromancerRevengeManager.ReceiveRPC(reader, __instance);
+                break;
+            case CustomRPC.SetSeekerTarget:
+                Seeker.ReceiveRPC(reader);
+                break;
+            case CustomRPC.SetSeekerPoints:
+                Seeker.ReceiveRPC(reader, setTarget: false);
+                break;
+            case CustomRPC.SetInfect:
+                PlagueDoctor.ReceiveRPC(reader);
+                break;
+            case CustomRPC.SetYandereTarget:
+                Yandere.ReceiveRPC(reader);
+                break;
+            case CustomRPC.SetYandereArrow:
+                Yandere.ReceiveRPC(reader);
+                break;
         }
     }
 }
@@ -611,6 +651,23 @@ internal class RPCHandlerPatch
 internal static class RPC
 {
     //来源：https://github.com/music-discussion/TownOfHost-TheOtherRoles/blob/main/Modules/RPC.cs
+    public static void AutoCreateRoom()
+    {
+        if (!Main.AutoCreateRoom.Value) return;
+        AmongUsClient.Instance.StartCoroutine(nameof(CREATEROOMANDJOIN));
+        static IEnumerator CREATEROOMANDJOIN()
+        {
+            var gameid = AmongUsClient.Instance.GameId;
+            yield return new WaitForSeconds(1);
+            try
+            {
+                AmongUsClient.Instance.ExitGame(DisconnectReasons.ExitGame);
+                SceneChanger.ChangeScene("MainMenu");
+            }
+            catch (Exception ex) { Logger.Info($"{ex}", "AutoCreateRoom"); }
+            AmongUsClient.Instance.CoJoinOnlineGameFromCode(gameid);
+        }
+    }
     public static void SyncCustomSettingsRPC(int targetId = -1)
     {
         if (targetId != -1)
@@ -823,7 +880,7 @@ internal static class RPC
             case CustomRoles.Vandalism:
                 Vandalism.Add(targetId);
                 break;
-           case CustomRoles.Prophet:
+            case CustomRoles.Prophet:
                 Prophet.Add(targetId);
                 break;
             case CustomRoles.Pirate:
@@ -846,6 +903,39 @@ internal static class RPC
                 break;
             case CustomRoles.BSR:
                 BSR.Add(targetId);
+                break;
+            case CustomRoles.Banshee:
+                Banshee.Add(targetId);
+                break;
+            case CustomRoles.Necromancer:
+                Necromancer.Add(targetId);
+                break;
+            case CustomRoles.Seeker:
+                Seeker.Add(targetId);
+                break;
+            case CustomRoles.Romantic:
+                Romantic.Add(targetId);
+                break;
+            case CustomRoles.VengefulRomantic:
+                VengefulRomantic.Add(targetId);
+                break;
+            case CustomRoles.RuthlessRomantic:
+                RuthlessRomantic.Add(targetId);
+                break;
+            case CustomRoles.Blackmailer:
+                Blackmailer.Add(targetId);
+                break;
+            case CustomRoles.PlagueDoctor:
+                PlagueDoctor.Add(targetId);
+                break;
+            case CustomRoles.Yandere:
+                Yandere.Add(targetId);
+                break;
+            case CustomRoles.SchrodingerCat:
+                SchrodingerCat.Add(targetId);
+                break;
+            case CustomRoles.RewardOfficer:
+                RewardOfficer.Add(targetId);
                 break;
             case CustomRoles.Lawyer:
                 Lawyer.Add(targetId);

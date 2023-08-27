@@ -145,6 +145,9 @@ public class PlayerGameOptionsSender : GameOptionsSender
             case CustomRoles.Scout:
             case CustomRoles.QSR:
             case CustomRoles.BSR:
+            case CustomRoles.Necromancer:
+            case CustomRoles.PlagueDoctor:
+            case CustomRoles.Yandere:
             case CustomRoles.SwordsMan:
             case CustomRoles.Arsonist:
             case CustomRoles.Minimalism:
@@ -211,6 +214,13 @@ public class PlayerGameOptionsSender : GameOptionsSender
             case CustomRoles.GlennQuagmire:
                 AURoleOptions.EngineerCooldown = Options.GlennQuagmireSkillCooldown.GetFloat();
                 AURoleOptions.EngineerInVentMaxTime = 1;
+                break;
+            case CustomRoles.Refugee:
+        //    case CustomRoles.Minion:
+                opt.SetVision(true);
+                break;
+            case CustomRoles.Blackmailer:
+                Blackmailer.ApplyGameOptions();
                 break;
             case CustomRoles.Paranoia:
                 AURoleOptions.EngineerCooldown =
@@ -292,6 +302,9 @@ public class PlayerGameOptionsSender : GameOptionsSender
                 break;
             case CustomRoles.CovenLeader:
                 CovenLeader.ApplyGameOptions(opt);
+                break;
+            case CustomRoles.Banshee:
+                Banshee.ApplyGameOptions(opt);
                 break;
             case CustomRoles.Jinx:
                 Jinx.ApplyGameOptions(opt);
@@ -419,10 +432,16 @@ public class PlayerGameOptionsSender : GameOptionsSender
             player.SyncSettings();
         }
 
+        // Ϊ�����ߵ�����
+        if (Main.AllPlayerControls.Where(x => x.Is(CustomRoles.Rambler) && !x.IsAlive() && x.GetRealKiller()?.PlayerId == player.PlayerId).Count() > 0)
+        {
+            Main.AllPlayerSpeed[player.PlayerId] = Options.RamblerSpeed.GetFloat();
+        }
+
         // Ͷ��ɵ�ϵ�������������
         if (
             (Main.GrenadierBlinding.Count >= 1 &&
-            (player.GetCustomRole().IsImpostor() ||
+            (player.GetCustomRole().IsImpostor() || player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isimp ||
             (player.GetCustomRole().IsNeutral() && Options.GrenadierCanAffectNeutral.GetBool()))
             ) || (
             Main.MadGrenadierBlinding.Count >= 1 && !player.GetCustomRole().IsImpostorTeam() && !player.Is(CustomRoles.Madmate))
@@ -474,6 +493,9 @@ public class PlayerGameOptionsSender : GameOptionsSender
                     break;
                 case CustomRoles.Vulture:
                     opt.SetVision(Vulture.HasImpVision.GetBool());
+                    break;
+                case CustomRoles.Rambler:
+                    Main.AllPlayerSpeed[player.PlayerId] = Options.RamblerSpeed.GetFloat();
                     break;
             }
         }

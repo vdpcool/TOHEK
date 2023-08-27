@@ -21,7 +21,7 @@ public static class ServerAddManager
 
         if (CultureInfo.CurrentCulture.Name.StartsWith("zh"))
         {
-        regionInfos.Add(CreateHttp("au-sh.pafyx.top", "梦服上海 (新)", 22000, true));
+        regionInfos.Add(CreateHttp("au-sh.pafyx.top", "梦服上海 (新)", 22000, false));
         regionInfos.Add(CreateHttp("matchmaker.among.us", "北美", 443, true));
         regionInfos.Add(CreateHttp("matchmaker-eu.among.us", "欧洲", 443, true));
         regionInfos.Add(CreateHttp("matchmaker-as.among.us", "亚洲", 443, true));

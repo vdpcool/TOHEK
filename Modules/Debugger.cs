@@ -111,4 +111,10 @@ class Logger
 
     public static LogHandler Handler(string tag)
         => new(tag);
+
+    internal static void Info(string v)
+    {
+        throw new NotImplementedException();
+    }
+
 }

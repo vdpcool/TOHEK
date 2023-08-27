@@ -29,7 +29,6 @@ static class PlayerOutfitExtension
                 instance.VisorId == targetOutfit.VisorId &&
                 instance.PetId == targetOutfit.PetId &&
                 instance.NamePlateId == targetOutfit.NamePlateId;
-
     }
     public static string GetString(this GameData.PlayerOutfit instance)
     {

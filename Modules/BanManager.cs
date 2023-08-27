@@ -16,7 +16,7 @@ public static class BanManager
     private static readonly string BAN_LIST_PATH = @"./TOHEK_DATA/BanList.txt";
     private static readonly string MODERATOR_LIST_PATH = @"./TOHEK_DATA/Moderators.txt";
     private static readonly string TESTER_LIST_PATH = @"./TOHEK_DATA/Testers.txt";
-    private static List<string> EACList = new();
+    private static readonly List<string> EACList = new();
     public static void Init()
     {
         try

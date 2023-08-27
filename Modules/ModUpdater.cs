@@ -225,7 +225,7 @@ public class ModUpdater
         try
         {
             var fileName = Assembly.GetExecutingAssembly().Location;
-            if (Directory.Exists("TOH_DATA") && File.Exists(@"./TOHEK_DATA/BanWords.txt"))
+            if (Directory.Exists("TOH_DATA") && File.Exists(@"./TOHE-DATA/BanWords.txt"))
             {
                 DirectoryInfo di = new("TOH_DATA");
                 di.Delete(true);
@@ -332,8 +332,10 @@ public class ModUpdater
             {
                 File.Delete(savePath);
                 ShowPopup(GetString("downloadFailed"), StringNames.Okay, true, false);
-                MainMenuManagerPatch.updateButton.SetActive(true);
-                MainMenuManagerPatch.updateButton.transform.position = MainMenuManagerPatch.template.transform.position + new Vector3(0.25f, 0.75f);
+                //MainMenuManagerPatch.UpdateButton.gameObject.SetActive(hasUpdate);
+                //MainMenuManagerPatch.UpdateButton.transform.Find("FontPlacer/Text_TMP").GetComponent<TMPro.TMP_Text>().SetText($"{GetString("updateButton")}\n{latestTitle}");
+                //MainMenuManagerPatch.updateButton.SetActive(true);
+                //MainMenuManagerPatch.updateButton.transform.position = MainMenuManagerPatch.template.transform.position + new Vector3(0.25f, 0.75f);
             }
             else
             {

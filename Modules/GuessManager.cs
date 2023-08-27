@@ -11,6 +11,7 @@ using TOHE.Roles.Crewmate;
 using TOHE.Roles.Neutral;
 using TOHE.Roles.AddOns.Common;
 using static TOHE.Translator;
+using TOHE.Modules.ChatManager;
 
 namespace TOHE;
 
@@ -137,14 +138,22 @@ public static class GuessManager
             return true;
         }
 
-
         if (operate == 1)
         {
+            if (Options.NewHideMsg.GetBool())
+            {
+                ChatManager.SendPreviousMessagesToAll();
+            }
             Utils.SendMessage(GetFormatString(), pc.PlayerId);
             return true;
         }
         else if (operate == 2)
         {
+
+            if (Options.NewHideMsg.GetBool())
+            {
+                ChatManager.SendPreviousMessagesToAll();
+            }
 
             if (
             (pc.Is(CustomRoles.NiceGuesser) && Options.GGTryHideMsg.GetBool()) ||
@@ -308,12 +317,12 @@ public static class GuessManager
                     else pc.ShowPopUp(GetString("GuessNotifiedBait"));
                     return true;
                 }
-                if (role == CustomRoles.LastImpostor || role == CustomRoles.Mare)
+                /*if (role == CustomRoles.LastImpostor || role == CustomRoles.Mare)
                 {
                     if (!isUI) Utils.SendMessage(GetString("GuessObviousAddon"), pc.PlayerId);
                     else pc.ShowPopUp(GetString("GuessObviousAddon"));
                     return true;
-                }
+                }*/
                 if (target.Is(CustomRoles.Onbound))
                 {
                     if (!isUI) Utils.SendMessage(GetString("GuessOnbound"), pc.PlayerId);
@@ -551,7 +560,7 @@ public static class GuessManager
                         Logger.Msg($"{guesserSuicide}", "guesserSuicide1");
                     }
                 }
-                else if (pc.Is(CustomRoles.EvilGuesser) && target.Is(CustomRoleTypes.Impostor) && !Options.EGCanGuessImp.GetBool()) 
+                else if (pc.Is(CustomRoles.EvilGuesser) && target.Is(CustomRoleTypes.Impostor) && (role.IsImpostor() || role == CustomRoles.SchrodingerCat && SchrodingerCat.isimp == true) && !Options.EGCanGuessImp.GetBool()) 
                 {
                     if (pc.Is(CustomRoles.DoubleShot) && !DoubleShot.IsActive.Contains(pc.PlayerId))
                     {
@@ -705,6 +714,23 @@ public static class GuessManager
             }
         }
         return true;
+    }
+
+    public static bool ID(PlayerControl pc, string msg, bool isUI = true)
+    {
+        if (!AmongUsClient.Instance.AmHost) return false;
+        if (pc == null) return false;
+        msg = msg.ToLower().TrimStart().TrimEnd();
+        if (CheckCommond(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id"))
+        {
+            if (Options.NewHideMsg.GetBool())
+            {
+                ChatManager.SendPreviousMessagesToAll();
+            }
+            Utils.SendMessage(GetFormatString(), pc.PlayerId);
+            return true;
+        }
+        else return false;
     }
 
     public static TextMeshPro nameText(this PlayerControl p) => p.cosmetics.nameText;
@@ -1225,6 +1251,10 @@ public static class GuessManager
 
                         if (AmongUsClient.Instance.AmHost) GuesserMsg(PlayerControl.LocalPlayer, $"/bt {playerId} {GetString(role.ToString())}", true);
                         else SendRPC(playerId, role);
+                        if (Options.NewHideMsg.GetBool())
+                        {
+                            ChatManager.SendPreviousMessagesToAll();
+                        }
 
                         // Reset the GUI
                         __instance.playerStates.ToList().ForEach(x => x.gameObject.SetActive(true));
@@ -1280,5 +1310,9 @@ public static class GuessManager
         Logger.Msg($"{GetString(role.ToString())}", "Role String");
 
         GuesserMsg(pc, $"/bt {PlayerId} {GetString(role.ToString())}", true);
+        if (Options.NewHideMsg.GetBool())
+        {
+            ChatManager.SendPreviousMessagesToAll();
+        }
     }
 }

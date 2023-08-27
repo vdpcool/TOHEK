@@ -1,7 +1,9 @@
 using AmongUs.Data;
 using AmongUs.GameOptions;
 using Hazel;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using InnerNet;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using TMPro;
 using TOHE.Modules;
 using TOHE.Roles.AddOns.Crewmate;
 using TOHE.Roles.AddOns.Impostor;
@@ -366,9 +369,9 @@ public static class Utils
             RoleColor = GetRoleColor(CustomRoles.Contagious);
             RoleText = GetRoleString("Contagious-") + RoleText;
         }
-        if (targetSubRoles.Contains(CustomRoles.seniormanagement) && (self || pure || seerMainRole == CustomRoles.Captain || (seerSubRoles.Contains(CustomRoles.seniormanagement))))
+        if (targetSubRoles.Contains(CustomRoles.Seniormanagement) && (self || pure || seerMainRole == CustomRoles.Captain || (seerSubRoles.Contains(CustomRoles.Seniormanagement))))
         {
-            RoleText = GetRoleString("seniormanagement") + RoleText;
+            RoleText = GetRoleString("Seniormanagement") + RoleText;
         }
 
         return (RoleText, RoleColor);
@@ -477,12 +480,22 @@ public static class Utils
             case CustomRoles.CovenLeader:
             case CustomRoles.ElectOfficials:
             case CustomRoles.BSR:
+            case CustomRoles.Banshee:
+            case CustomRoles.Necromancer:
+            case CustomRoles.Seeker:
+            case CustomRoles.Romantic:
+            case CustomRoles.VengefulRomantic:
+            case CustomRoles.RuthlessRomantic:
+            case CustomRoles.Refugee:
+            case CustomRoles.PlagueDoctor:
+            case CustomRoles.Yandere:
                 hasTasks = false;
                 break;
             case CustomRoles.Workaholic:
             case CustomRoles.Terrorist:
             case CustomRoles.Sunnyboy:
             case CustomRoles.MengJiangGirl:
+            case CustomRoles.SpecialAgent:
             case CustomRoles.Opportunist:
             case CustomRoles.Phantom:
             case CustomRoles.Convict:
@@ -553,7 +566,7 @@ public static class Utils
             pc.Is(CustomRoles.Loyal) ||
             pc.Is(CustomRoles.Captain) ||
             pc.Is(CustomRoles.Solicited) ||
-            pc.Is(CustomRoles.seniormanagement) ||
+            pc.Is(CustomRoles.Seniormanagement) ||
             pc.Is(CustomRoles.Believer) || 
             pc.Is(CustomRoles.CyberStar) ||
             pc.Is(CustomRoles.Egoist) ||
@@ -626,6 +639,20 @@ public static class Utils
                 break;
             case CustomRoles.QSR:
                 ProgressText.Append(QSR.GetSkillLimit(playerId));
+                break;
+            case CustomRoles.Seeker:
+                ProgressText.Append(ColorString(GetRoleColor(CustomRoles.Seeker).ShadeColor(0.25f), $"({Seeker.TotalPoints[playerId]}/{Seeker.PointsToWin.GetInt()})"));
+                break;
+            case CustomRoles.Romantic:
+                ProgressText.Append(Romantic.GetProgressText(playerId));
+                break;
+            case CustomRoles.VengefulRomantic:
+                ProgressText.Append(VengefulRomantic.GetProgressText(playerId));
+                break;
+            case CustomRoles.PlagueDoctor:
+                var infect = PlagueDoctor.InfectNum;
+                var pcList = Main.AllAlivePlayerControls.ToList().Count - 1;
+                ProgressText.Append(ColorString(GetRoleColor(CustomRoles.PlagueDoctor).ShadeColor(0.25f), $"({infect}/{pcList})"));
                 break;
             case CustomRoles.Sniper:
                 ProgressText.Append(Sniper.GetBulletCount(playerId));
@@ -1069,7 +1096,7 @@ public static class Utils
         {
             if (role is CustomRoles.NotAssigned or
                         CustomRoles.LastImpostor) continue;
-            if (summary && role is CustomRoles.Madmate or CustomRoles.Charmed or CustomRoles.Infected or CustomRoles.Contagious or CustomRoles.Soulless or CustomRoles.seniormanagement) continue;
+            if (summary && role is CustomRoles.Madmate or CustomRoles.Charmed or CustomRoles.Infected or CustomRoles.Contagious or CustomRoles.Soulless or CustomRoles.Seniormanagement) continue;
 
             var RoleText = disableColor ? GetRoleName(role) : ColorString(GetRoleColor(role), GetRoleName(role));
             sb.Append($"{ColorString(Color.white, " + ")}{RoleText}");
@@ -1274,7 +1301,7 @@ public static class Utils
 
         string name = Main.AllPlayerNames.TryGetValue(player.PlayerId, out var n) ? n : "";
         if (name == "") return;
-        if ((player.AmOwner || (player.IsModClient() && player.FriendCode.GetDevUser().HasTag()))) return;
+        if (player.AmOwner || player.IsModClient() && player.FriendCode.GetDevUser().HasTag()) return;
         if (Options.ApplyModeratorList.GetValue() == 0 || !ChatCommands.IsPlayerModerator(player.FriendCode))
         {
             name = Main.AllPlayerNames.TryGetValue(player.PlayerId, out var n1) ? n1 : "";
@@ -1297,7 +1324,7 @@ public static class Utils
 
         string name = Main.AllPlayerNames.TryGetValue(player.PlayerId, out var n) ? n : "";
         if (name == "") return;
-        if ((player.AmOwner || (player.IsModClient() && player.FriendCode.GetDevUser().HasTag()))) return;
+        if (player.AmOwner || player.IsModClient() && player.FriendCode.GetDevUser().HasTag()) return;
         if (Options.ApplyTesterList.GetValue() == 0 || !ChatCommands.IsPlayerTester(player.FriendCode))
         {
             name = Main.AllPlayerNames.TryGetValue(player.PlayerId, out var n1) ? n1 : "";
@@ -1312,6 +1339,84 @@ public static class Utils
         }
         if (name != player.name && player.CurrentOutfitType == PlayerOutfitType.Default)
             player.RpcSetName(name);
+    }
+    public static Sprite CreateSprite(string path, bool fromDisk = false)
+    {
+        Texture2D texture = fromDisk ? Utils.LoadTextureFromDisk(path) : Utils.LoadTextureFromResources(path);
+        if (texture == null)
+            return null;
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.53f, 0.575f), texture.width * 0.375f);
+        if (sprite == null)
+            return null;
+        texture.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
+        sprite.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
+        return sprite;
+    }
+    public static Texture2D LoadTextureFromDisk(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                Texture2D texture = new(2, 2, TextureFormat.ARGB32, true);
+                byte[] byteTexture = File.ReadAllBytes(path);
+                LoadImage(texture, byteTexture, false);
+                return texture;
+            }
+        }
+        catch
+        {
+            System.Console.WriteLine("Error loading texture from disk: " + path);
+        }
+        return null;
+    }
+    internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
+    internal static d_LoadImage iCall_LoadImage;
+    private static bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
+    {
+        if (iCall_LoadImage == null)
+            iCall_LoadImage = IL2CPP.ResolveICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
+        var il2cppArray = (Il2CppStructArray<byte>)data;
+        return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
+    }
+    public static void DestroyList<T>(Il2CppSystem.Collections.Generic.List<T> items) where T : UnityEngine.Object
+    {
+        if (items == null) return;
+        foreach (T item in items)
+        {
+            UnityEngine.Object.Destroy(item);
+        }
+    }
+    public static void DestroyList<T>(List<T> items) where T : UnityEngine.Object
+    {
+        if (items == null) return;
+        foreach (T item in items)
+        {
+            UnityEngine.Object.Destroy(item);
+        }
+    }
+    public static Dictionary<byte, HatParent> HatRendererCache = new();
+    public static Dictionary<byte, SpriteRenderer> HatRendCache = new();
+    public static Dictionary<byte, VisorLayer> VisorSlotCache = new();
+    public static HatParent HatRenderer(this PlayerControl player)
+    {
+        return player.cosmetics.hat;
+    }
+    public static HatParent HatSlot(this PoolablePlayer player)
+    {
+        return player.cosmetics.hat;
+    }
+    public static SpriteRenderer HatRend(this PlayerControl player)
+    {
+        return player.cosmetics.hat.Parent;
+    }
+    public static VisorLayer VisorSlot(this PlayerControl player)
+    {
+        return player.cosmetics.visor;
+    }
+    public static VisorLayer VisorSlot(this PoolablePlayer player)
+    {
+        return player.cosmetics.visor;
     }
     public static PlayerControl GetPlayerById(int PlayerId)
     {
@@ -1412,11 +1517,37 @@ public static class Utils
 
             //玩家自身血量提示
             SelfMark.Append(Gamer.TargetMark(seer, seer));
+            SelfMark.Append(PlagueDoctor.TargetMark(seer, seer));
 
             //銃声が聞こえるかチェック
             SelfMark.Append(Sniper.GetShotNotify(seer.PlayerId));
             //Markとは違い、改行してから追記されます。
             SelfSuffix.Clear();
+
+            // Necroview
+            /*   if (seer.Is(CustomRoles.Necroview) && isForMeeting)
+                {
+                    if (target.Is(CustomRoleTypes.Crewmate) && !(target.Is(CustomRoles.Madmate) || target.Is(CustomRoles.Egoist) || target.Is(CustomRoles.Charmed) || target.Is(CustomRoles.Recruit) || target.Is(CustomRoles.Infected) || target.Is(CustomRoles.Contagious) || target.Is(CustomRoles.Rogue) || target.Is(CustomRoles.Rascal) || target.Is(CustomRoles.Soulless)) && target.Data.IsDead || target.Is(CustomRoles.Admired) && target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Bait), "★"));
+
+                    if ((target.Is(CustomRoleTypes.Impostor) || target.Is(CustomRoles.Madmate) || target.Is(CustomRoles.Rascal) || target.Is(CustomRoles.Parasite) || target.Is(CustomRoles.Refugee) || target.Is(CustomRoles.Crewpostor) || target.Is(CustomRoles.Convict)) && target.Data.IsDead || !target.Is(CustomRoles.Admired) && target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Impostor), "★"));
+
+                    if ((target.Is(CustomRoleTypes.Neutral) || target.Is(CustomRoles.Rogue) || target.Is(CustomRoles.Contagious) || target.Is(CustomRoles.Charmed) || target.Is(CustomRoles.Recruit) || target.Is(CustomRoles.Infected) || target.Is(CustomRoles.Egoist) || target.Is(CustomRoles.Soulless)) && target.Data.IsDead || !target.Is(CustomRoles.Admired) && target.Data.IsDead || (target.Is(CustomRoles.Parasite) || target.Is(CustomRoles.Refugee) || target.Is(CustomRoles.Crewpostor) || target.Is(CustomRoles.Convict)) && target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Executioner), "★"));
+                }
+            // Visionary
+                if (seer.Is(CustomRoles.Visionary) && isForMeeting)
+                {
+                    if (target.Is(CustomRoleTypes.Crewmate) && !(target.Is(CustomRoles.Madmate) || target.Is(CustomRoles.Egoist) || target.Is(CustomRoles.Charmed) || target.Is(CustomRoles.Recruit) || target.Is(CustomRoles.Infected) || target.Is(CustomRoles.Contagious) || target.Is(CustomRoles.Rogue) || target.Is(CustomRoles.Rascal) || target.Is(CustomRoles.Soulless)) && !target.Data.IsDead || target.Is(CustomRoles.Admired) && !target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Bait), "★"));
+
+                    if ((target.Is(CustomRoleTypes.Impostor) || target.Is(CustomRoles.Madmate) || target.Is(CustomRoles.Rascal) || target.Is(CustomRoles.Parasite) || target.Is(CustomRoles.Refugee) || target.Is(CustomRoles.Crewpostor) || target.Is(CustomRoles.Convict)) && !target.Data.IsDead || !target.Is(CustomRoles.Admired) && !target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Impostor), "★"));
+
+                    if ((target.Is(CustomRoleTypes.Neutral) || target.Is(CustomRoles.Rogue) || target.Is(CustomRoles.Contagious) || target.Is(CustomRoles.Charmed) || target.Is(CustomRoles.Recruit) || target.Is(CustomRoles.Infected) || target.Is(CustomRoles.Egoist) || target.Is(CustomRoles.Soulless)) && !target.Data.IsDead || !target.Is(CustomRoles.Admired) && !target.Data.IsDead || (target.Is(CustomRoles.Parasite) || target.Is(CustomRoles.Refugee) || target.Is(CustomRoles.Crewpostor) || target.Is(CustomRoles.Convict)) && !target.Data.IsDead)
+                        TargetMark.Append(ColorString(GetRoleColor(CustomRoles.Executioner), "★"));
+                } */
 
             if (seer.Is(CustomRoles.BountyHunter) && !isForMeeting)
             {
@@ -1470,6 +1601,10 @@ public static class Utils
             else if (seer.Is(CustomRoles.GrudgeSheriff))
             {
                 SelfSuffix.Append(ColorString(GetRoleColor(CustomRoles.GrudgeSheriff), GrudgeSheriff.GetGuardPlayerText(seer, false, isForMeeting)));
+            }
+            if (seer.Is(CustomRoles.Yandere))
+            {
+                SelfSuffix.Append(Yandere.GetTargetArrow(seer));
             }
 
             //タスクを終えたSnitchがインポスター/キル可能なニュートラルの方角を確認できる
@@ -1748,9 +1883,43 @@ public static class Utils
                         (Succubus.KnowRole(seer, target)) ||
                         (Captain.KnowRole(seer, target)) ||
                         (Jackal.KnowRole(seer, target)) ||
+                        (Romantic.KnowRole(seer, target)) ||
                         (CursedSoul.KnowRole(seer, target)) ||
                         (Infectious.KnowRole(seer, target)) ||
                         (Virus.KnowRole(seer, target)) ||
+                    //喵喵队
+                    //内鬼
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isimp == true && target.Is(CustomRoleTypes.Impostor) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoleTypes.Impostor) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isimp == true && Options.CanKnowKiller.GetBool()) ||
+                    //豺狼
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && target.Is(CustomRoles.Jackal) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.Jackal) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && target.Is(CustomRoles.Sidekick) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.Sidekick) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && target.Is(CustomRoles.Whoops) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.Whoops) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true && Options.CanKnowKiller.GetBool()) ||
+                    //西风骑士团(bushi)
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isbk == true && target.Is(CustomRoles.BloodKnight) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.BloodKnight) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isbk == true && Options.CanKnowKiller.GetBool()) ||
+                    //疫情的源头
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.ispg == true && target.Is(CustomRoles.PlaguesGod) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.PlaguesGod) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.ispg == true && Options.CanKnowKiller.GetBool()) ||
+                    //玩家
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isgam == true && target.Is(CustomRoles.Gamer) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.Gamer) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isgam == true && Options.CanKnowKiller.GetBool()) ||
+                    //穹P黑客(BUSHI)
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isyl == true && target.Is(CustomRoles.YinLang) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.YinLang) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isyl == true && Options.CanKnowKiller.GetBool()) ||
+                    //黑，真tm黑
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isdh == true && target.Is(CustomRoles.DarkHide) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.DarkHide) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isdh == true && Options.CanKnowKiller.GetBool()) ||
+                     //雇佣
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && target.Is(CustomRoles.OpportunistKiller) && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.OpportunistKiller) && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && Options.CanKnowKiller.GetBool()) ||
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && target.Is(CustomRoles.SchrodingerCat) &&SchrodingerCat.isok == true && Options.CanKnowKiller.GetBool()) ||
+                    //孤独
+                    (seer.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && target.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isln == true && Options.CanKnowKiller.GetBool()) ||
+                    //神与神
                         (seer.IsRevealedPlayer(target) && !target.Is(CustomRoles.Trickster)) ||
                         (seer.Is(CustomRoles.God)) ||
                         (target.Is(CustomRoles.GM))
@@ -1808,6 +1977,10 @@ public static class Utils
                         TargetPlayerName = ColorString(GetRoleColor(CustomRoles.ParityCop), target.PlayerId.ToString()) + " " + TargetPlayerName;
                     }
                 }
+                if (seer.Is(CustomRoles.Necromancer) && !seer.IsAlive() && target.IsAlive())
+                {
+                    TargetPlayerName = ColorString(GetRoleColor(CustomRoles.Necromancer), target.PlayerId.ToString()) + " " + TargetPlayerName;
+                }
                 if (seer.Is(CustomRoles.Councillor))
                 {
                     if (seer.IsAlive() && target.IsAlive() && GuesserIsForMeeting)
@@ -1856,7 +2029,7 @@ public static class Utils
                     }
 
                     // Coven
-                    if (seer.IsAlive() && target.IsAlive() && GuesserIsForMeeting && Options.CovenMembersCanGuess.GetBool() && seer.GetCustomRole().IsCoven())
+                    if (seer.IsAlive() && target.IsAlive() && GuesserIsForMeeting && !seer.Is(CustomRoles.Necromancer) && Options.CovenMembersCanGuess.GetBool() && seer.GetCustomRole().IsCoven())
                     {
                         TargetPlayerName = ColorString(GetRoleColor(seer.GetCustomRole()), target.PlayerId.ToString()) + " " + TargetPlayerName;
                     }
@@ -1900,6 +2073,9 @@ public static class Utils
 
                 TargetMark.Append(Gamer.TargetMark(seer, target));
                 TargetMark.Append(Totocalcio.TargetMark(seer, target));
+                TargetMark.Append(Romantic.TargetMark(seer, target));
+                TargetMark.Append(PlagueDoctor.TargetMark(seer, target));
+                TargetMark.Append(Yandere.TargetMark(seer, target));
                 TargetMark.Append(Lawyer.LawyerMark(seer, target));
                 TargetMark.Append(Deathpact.GetDeathpactMark(seer, target));
 
@@ -1964,7 +2140,10 @@ public static class Utils
         Copycat.AfterMeetingTasks();
         Bakery.AfterMeetingTasks();
         Main.ShamanTarget = byte.MaxValue;
+        Main.ShamanTargetChoosen = false;
         Pirate.AfterMeetingTask();
+        Seeker.AfterMeetingTasks();
+        Main.BurstBodies.Clear();
         if (Options.AirshipVariableElectrical.GetBool())
             AirshipElectricalDoors.Initialize();
     }
@@ -2007,13 +2186,15 @@ public static class Utils
                         Main.CyberStarDead.Add(target.PlayerId);
                 }
                 break;
+            case CustomRoles.Romantic:
+                Romantic.isRomanticAlive = false;
+                break;
             case CustomRoles.Pelican:
                 Pelican.OnPelicanDied(target.PlayerId);
                 break;
             case CustomRoles.Devourer:
                 Devourer.OnDevourerDied(target.PlayerId);
                 break;
-
             case CustomRoles.Captain:
                 if (GameStates.IsMeeting)
                 {
@@ -2031,12 +2212,23 @@ public static class Utils
                     Main.CaptainDead.Add(target.PlayerId);
             }
             break;
+            case CustomRoles.Yandere:
+                if (Yandere.Target.ContainsKey(target.PlayerId))
+                {
+                    Yandere.Target.Remove(target.PlayerId);
+                    Yandere.SendRPC(target.PlayerId);
+                }
+                break;
         }
 
         if (Executioner.Target.ContainsValue(target.PlayerId))
             Executioner.ChangeRoleByTarget(target);
         if (Lawyer.Target.ContainsValue(target.PlayerId))
             Lawyer.ChangeRoleByTarget(target);
+        if (Romantic.BetPlayer.ContainsValue(target.PlayerId))
+            Romantic.ChangeRole(target.PlayerId);
+        if (Yandere.Target.ContainsValue(target.PlayerId))
+            Yandere.ChangeRoleByTarget(target);
 
         FixedUpdatePatch.LoversSuicide(target.PlayerId, onMeeting);
         FixedUpdatePatch.CaptainSuicide(target.PlayerId, onMeeting, true);
@@ -2082,13 +2274,16 @@ public static class Utils
     }
     public static void DumpLog()
     {
-        string t = DateTime.Now.ToString("yyyy-MM-dd_HH.mm.ss");
-        string filename = $"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}/TOHEK-v{Main.PluginVersion}-{t}.log";
-        FileInfo file = new(@$"{System.Environment.CurrentDirectory}/BepInEx/LogOutput.log");
-        file.CopyTo(@filename);
-        Utils.OpenDirectory(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
-        if (PlayerControl.LocalPlayer != null)
-            HudManager.Instance?.Chat?.AddChat(PlayerControl.LocalPlayer, GetString("DumpLogNotify"));
+        if (Main.DumpLog.Value)
+        {
+            string t = DateTime.Now.ToString("yyyy-MM-dd_HH.mm.ss");
+            string filename = $"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}/TOHEK-v{Main.PluginVersion}-{t}.log";
+            FileInfo file = new(@$"{System.Environment.CurrentDirectory}/BepInEx/LogOutput.log");
+            file.CopyTo(@filename);
+            Utils.OpenDirectory(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
+            if (PlayerControl.LocalPlayer != null)
+                HudManager.Instance?.Chat?.AddChat(PlayerControl.LocalPlayer, GetString("DumpLogNotify"));
+        }
     }
     public static void OpenDirectory(string path)
     {
@@ -2288,4 +2483,10 @@ public static class Utils
 
     public static int PlayersCount(CountTypes countTypes) => Main.PlayerStates.Values.Count(state => state.countTypes == countTypes);
     public static int AlivePlayersCount(CountTypes countTypes) => Main.AllAlivePlayerControls.Count(pc => pc.Is(countTypes));
+
+    internal static Texture2D LoadSprite(string v1, bool v2)
+    {
+        throw new NotImplementedException();
+    }
+
 }

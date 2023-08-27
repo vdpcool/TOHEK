@@ -278,6 +278,7 @@ public class TaskState
     public int AllTasksCount;
     public int CompletedTasksCount;
     public bool hasTasks;
+    public static bool invbool = false;
     public int RemainingTasksCount => AllTasksCount - CompletedTasksCount;
     public bool DoExpose => RemainingTasksCount <= Options.SnitchExposeTaskLeft && hasTasks;
     public bool IsTaskFinished => RemainingTasksCount <= 0 && hasTasks;
@@ -510,6 +511,44 @@ public class TaskState
                 if (rndNum >= 90 && rndNum < 100)
                 {
                     player.RpcSetCustomRole(CustomRoles.Indomitable);
+                }
+            }
+            //聚能者聚能
+            if (player.Is(CustomRoles.Energizer) && (CompletedTasksCount + 1) >= AllTasksCount)
+            {
+                player.RpcSetCustomRole(CustomRoles.Ntr);
+                player.RpcSetCustomRole(CustomRoles.Watcher);
+                player.RpcSetCustomRole(CustomRoles.Flashman);
+                player.RpcSetCustomRole(CustomRoles.Lighter);
+                player.RpcSetCustomRole(CustomRoles.Seer);
+                player.RpcSetCustomRole(CustomRoles.Brakar);
+                player.RpcSetCustomRole(CustomRoles.Avanger);
+                player.RpcSetCustomRole(CustomRoles.DualPersonality);
+                player.RpcSetCustomRole(CustomRoles.Bait);
+                player.RpcSetCustomRole(CustomRoles.Trapper);
+                player.RpcSetCustomRole(CustomRoles.Fategiver);
+                player.RpcSetCustomRole(CustomRoles.Diseased);
+                player.RpcSetCustomRole(CustomRoles.OldThousand);
+            }
+            //卷姐完成任务
+            if (player.Is(CustomRoles.Involution))
+            {
+                invbool = true;
+            }
+            //特务做完工作了
+            if (player.Is(CustomRoles.SpecialAgent) && (CompletedTasksCount + 1) >= AllTasksCount)
+            {
+                if (player.Is(CustomRoles.Charmed))
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Succubus);
+                }
+                else if (player.Is(CustomRoles.Lovers))
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Lovers);
+                }
+                else
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Impostor);
                 }
             }
 
