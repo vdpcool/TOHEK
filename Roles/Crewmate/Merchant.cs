@@ -27,7 +27,8 @@ namespace TOHE.Roles.Crewmate
             CustomRoles.Necroview,
             CustomRoles.Onbound,
             CustomRoles.DualPersonality,
-            CustomRoles.Antidote
+            CustomRoles.Antidote,
+            CustomRoles.Burst
         };
 
         private static readonly List<CustomRoles> harmfulAddons = new List<CustomRoles>
@@ -44,7 +45,7 @@ namespace TOHE.Roles.Crewmate
 
         private static readonly List<CustomRoles> experimentalAddons = new List<CustomRoles>
         {
-        //    CustomRoles.Flashman,
+            CustomRoles.Flashman,
             CustomRoles.Egoist,
             CustomRoles.Ntr,
             CustomRoles.Guesser,

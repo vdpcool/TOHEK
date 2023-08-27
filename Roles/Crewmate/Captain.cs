@@ -85,12 +85,12 @@ public static class Captain
                     if (!target.CanUseKillButton() && !target.Is(CustomRoles.Solicited) && !target.Is(CustomRoles.Believer))
                     {
                         target.RpcSetCustomRole(CustomRoles.Solicited);
-                        target.RpcSetCustomRole(CustomRoles.seniormanagement);
+                        target.RpcSetCustomRole(CustomRoles.Seniormanagement);
                     }
                     if (target.CanUseKillButton() && !target.Is(CustomRoles.Solicited) && !target.Is(CustomRoles.Believer))
                     {
                         target.RpcSetCustomRole(CustomRoles.Solicited);
-                        target.RpcSetCustomRole(CustomRoles.seniormanagement);
+                        target.RpcSetCustomRole(CustomRoles.Seniormanagement);
                     }
                 
 

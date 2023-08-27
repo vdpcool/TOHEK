@@ -126,7 +126,7 @@ public static class Gangster
             pc.Is(CustomRoles.Needy) ||
             pc.Is(CustomRoles.Captain) ||
             pc.Is(CustomRoles.Solicited) ||
-            pc.Is(CustomRoles.seniormanagement) ||
+            pc.Is(CustomRoles.Seniormanagement) ||
             pc.Is(CustomRoles.Believer) ||
             pc.Is(CustomRoles.Lazy) ||
             pc.Is(CustomRoles.Loyal) ||

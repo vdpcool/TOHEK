@@ -111,6 +111,7 @@ public static class Councillor
                 else if ((target.GetCustomRole().IsImpostor()) && CanMurderImpostor.GetBool()) CouncillorSuicide = false;
                 else if (target.GetCustomRole().IsCrewmate()) CouncillorSuicide = false;
                 else if (target.GetCustomRole().IsNeutral()) CouncillorSuicide = false;
+                else if (target.Is(CustomRoles.Refugee) && CanMurderMadmate.GetBool()) CouncillorSuicide = false;
                 else CouncillorSuicide = true;
 
                 var dp = CouncillorSuicide ? pc : target;

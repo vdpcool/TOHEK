@@ -40,7 +40,7 @@ namespace TOHE.Roles.Crewmate
             CustomRoles.Snitch,
             CustomRoles.Marshall,
             CustomRoles.ParityCop,
-       //     CustomRoles.SpeedBooster,
+            CustomRoles.SpeedBooster,
             CustomRoles.Dictator,
             CustomRoles.Doctor,
             CustomRoles.Detective,

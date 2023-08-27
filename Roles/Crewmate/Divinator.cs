@@ -79,7 +79,8 @@ public static class Divinator
                 CustomRoles.Observer or
                 CustomRoles.DovesOfNeace or
                 CustomRoles.Virus or
-                CustomRoles.Pirate
+                CustomRoles.Pirate or
+                CustomRoles.Banshee
                 => "HideMsg",
 
                 CustomRoles.Miner or
@@ -98,7 +99,8 @@ public static class Divinator
                 CustomRoles.Janitor or
                 CustomRoles.Crewpostor or
                 CustomRoles.Disperser or
-                CustomRoles.Mascot
+                CustomRoles.Mascot or
+                CustomRoles.SpecialAgent
                 => "Honest",
 
                 CustomRoles.SerialKiller or
@@ -144,7 +146,10 @@ public static class Divinator
                 CustomRoles.Revolutionist or
                 CustomRoles.Gamer or
                 CustomRoles.Eraser or
-                CustomRoles.Farseer
+                CustomRoles.Farseer or
+                CustomRoles.RuthlessRomantic or
+                CustomRoles.VengefulRomantic or
+                CustomRoles.Refugee
                 => "Blockbuster",
 
                 CustomRoles.Warlock or
@@ -164,7 +169,11 @@ public static class Divinator
                 CustomRoles.TimeStops or
                 CustomRoles.Prophet or
                 CustomRoles.Scout or
-                CustomRoles.QX
+                CustomRoles.QX or
+                CustomRoles.Bull or
+                CustomRoles.Necromancer or
+                CustomRoles.Fraudster or
+                CustomRoles.PlagueDoctor
                 => "Strong",
 
                 CustomRoles.Witch or
@@ -181,7 +190,8 @@ public static class Divinator
                 CustomRoles.Workaholic or
                 CustomRoles.Provocateur or
                 CustomRoles.QSR or
-                CustomRoles.Masochism
+                CustomRoles.Masochism or
+                CustomRoles.Yandere
                 => "Incomprehensible",
 
                 CustomRoles.FireWorks or
@@ -193,7 +203,9 @@ public static class Divinator
                 CustomRoles.Sunnyboy or
                 CustomRoles.Bard or
                 CustomRoles.Totocalcio or
-                CustomRoles.Bloodhound
+                CustomRoles.Bloodhound or
+                CustomRoles.Seeker or
+                CustomRoles.Romantic
                 => "Enthusiasm",
 
                 CustomRoles.BoobyTrap or

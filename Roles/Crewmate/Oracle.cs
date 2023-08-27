@@ -158,15 +158,18 @@ public static class Oracle
             CustomRoles.Totocalcio or
             CustomRoles.Virus or
             CustomRoles.Succubus or
-            CustomRoles.Pirate
+            CustomRoles.Pirate or
+            CustomRoles.Refugee
                 => "Neut",
 
+            CustomRoles.Banshee or
             CustomRoles.Poisoner or
             CustomRoles.Wraith or
             CustomRoles.Jinx or
             CustomRoles.Ritualist or
             CustomRoles.Medusa or
             CustomRoles.HexMaster or
+            CustomRoles.Necromancer or
             CustomRoles.CovenLeader
                 => "Coven",
 

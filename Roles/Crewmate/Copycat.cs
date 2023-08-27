@@ -19,6 +19,7 @@ public static class Copycat
     public static Dictionary<byte, float> MiscopyLimit = new();
 
     public static OptionItem KillCooldown;
+    public static OptionItem CopyCrewVar;
     public static OptionItem CanKill;
     public static OptionItem MiscopyLimitOpt;
 
@@ -27,6 +28,7 @@ public static class Copycat
         SetupRoleOptions(Id, TabGroup.CrewmateRoles, CustomRoles.Copycat);
         KillCooldown = FloatOptionItem.Create(Id + 10, "CopycatCopyCooldown", new(0f, 999f, 1f), 15f, TabGroup.CrewmateRoles, false).SetParent(Options.CustomRoleSpawnChances[CustomRoles.Copycat])
             .SetValueFormat(OptionFormat.Seconds);
+        CopyCrewVar = BooleanOptionItem.Create(Id+13, "CopyCrewVar",true,TabGroup.CrewmateRoles,false).SetParent(Options.CustomRoleSpawnChances[CustomRoles.Copycat]);        
         CanKill = BooleanOptionItem.Create(Id + 11, "CopycatCanKill", false, TabGroup.CrewmateRoles, false).SetParent(Options.CustomRoleSpawnChances[CustomRoles.Copycat]);
         MiscopyLimitOpt = IntegerOptionItem.Create(Id + 12, "CopycatMiscopyLimit", new(0, 14, 1), 2, TabGroup.CrewmateRoles, false).SetParent(CanKill)
             .SetValueFormat(OptionFormat.Times);
@@ -176,6 +178,17 @@ public static class Copycat
             pc.Notify(GetString("CopycatCanNotCopy"));
             SetKillCooldown(pc.PlayerId);
             return false;
+        }
+        if (CopyCrewVar.GetBool())
+        {
+            if (role == CustomRoles.Mafia || role == CustomRoles.Necromancer) role = CustomRoles.Retributionist;
+            if (role == CustomRoles.Visionary) role = CustomRoles.Oracle;
+            if (role == CustomRoles.Workaholic) role = CustomRoles.Snitch;
+            if (role == CustomRoles.Sunnyboy) role = CustomRoles.Doctor;
+            if (role == CustomRoles.Vindicator || role == CustomRoles.Pickpocket) role = CustomRoles.Mayor;
+            else if (role == CustomRoles.Councillor) role = CustomRoles.Judge;
+            else if (role == CustomRoles.Sans || role == CustomRoles.Juggernaut) role = CustomRoles.Medic;
+            else if (role == CustomRoles.EvilGuesser || role == CustomRoles.Doomsayer) role = CustomRoles.NiceGuesser;
         }
         if (role.IsCrewmate() && (!tpc.GetCustomSubRoles().Any(x => x == CustomRoles.Rascal)))
         {

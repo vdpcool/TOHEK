@@ -90,6 +90,5 @@ public static class ElectOfficials
             killer.RpcMurderPlayerV3(killer);
             return true;
         }
-        return false;
     }
 }
