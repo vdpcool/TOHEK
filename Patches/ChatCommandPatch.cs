@@ -13,6 +13,8 @@ using UnityEngine;
 using static TOHE.Translator;
 using TOHE.Roles.Impostor;
 using TOHE.Roles.Neutral;
+using TOHE.Modules.ChatManager;
+
 
 namespace TOHE;
 
@@ -51,10 +53,21 @@ internal class ChatCommands
         Logger.Info(text, "SendChat");
         if (text.Length >= 3) if (text[..2] == "/r" && text[..3] != "/rn") args[0] = "/r";
         if (text.Length >= 4) if (text[..3] == "/up") args[0] = "/up";
+        if ((Options.NewHideMsg.GetBool() || Blackmailer.ForBlackmailer.Contains(PlayerControl.LocalPlayer.PlayerId)) && PlayerControl.LocalPlayer.IsAlive())
+        {
+            ChatManager.SendMessage(PlayerControl.LocalPlayer, text);
+        }
+        if ((Options.NewHideMsg.GetBool() && ChatManager.cancel == true || Blackmailer.ForBlackmailer.Contains(PlayerControl.LocalPlayer.PlayerId)) && PlayerControl.LocalPlayer.IsAlive())
+        {
+            ChatManager.SendPreviousMessagesToAll();
+            ChatManager.cancel = false;
+            goto Canceled;
+        }
         if (GuessManager.GuesserMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (Judge.TrialMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (ParityCop.ParityCheckMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (Pirate.DuelCheckMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
+        if (NecromancerRevengeManager.NecromancerMsgCheck(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (Councillor.MurderMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (Mediumshiper.MsMsg(PlayerControl.LocalPlayer, text)) goto Canceled;
         if (MafiaRevengeManager.MafiaMsgCheck(PlayerControl.LocalPlayer, text)) goto Canceled;
@@ -300,6 +313,13 @@ internal class ChatCommands
                     break;
                 }
 
+                // Prevent testers from kicking other testers
+                if (IsPlayerTester(kickedPlayer.FriendCode))
+                {
+                    Utils.SendMessage(GetString("KickCommandKickMod"), PlayerControl.LocalPlayer.PlayerId);
+                    break;
+                }
+
                 // Kick the specified player
                 AmongUsClient.Instance.KickPlayer(kickedPlayer.GetClientId(), true);
                 string kickedPlayerName = kickedPlayer.GetRealName();
@@ -396,14 +416,12 @@ internal class ChatCommands
                     Utils.SendMessage(msgText, PlayerControl.LocalPlayer.PlayerId);
                     break;
 
-                
                 case "/qq":
                     canceled = true;
                     if (Main.newLobby) Cloud.ShareLobby(true);
                     else Utils.SendMessage("很抱歉，每个房间车队姬只会发一次", PlayerControl.LocalPlayer.PlayerId);
                     break;
-                
-                
+
                 case "/changerole":
                     if (!DebugModeManager.AmDebugger) break;
                     canceled = true;
@@ -428,6 +446,7 @@ internal class ChatCommands
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Draw);
                     GameManager.Instance.LogicFlow.CheckEndCriteria();
                     break;
+
                 case "/cosid":
                     canceled = true;
                     var of = PlayerControl.LocalPlayer.Data.DefaultOutfit;
@@ -526,6 +545,8 @@ internal class ChatCommands
             "愚者" or "愚" => GetString("Psychic"),
             "修理大师" or "修理" or "维修" => GetString("SabotageMaster"),
             "警長" => GetString("Sheriff"),
+            "GrudgeSheriff" => GetString("GrudgeSheriff"),
+            "SillySheriff" => GetString("SillySheriff"),
             "告密者" or "告密" => GetString("Snitch"),
             "增速者" or "增速" => GetString("SpeedBooster"),
             "時間操控者" or "时间操控人" or "时间操控" => GetString("TimeManager"),
@@ -617,16 +638,6 @@ internal class ChatCommands
             "破坏狂" or "飞船炸了" or "破坏者" or "破坏" => GetString("Vandalism"),
             "时间之主" or "时主" or "施主" or "失主" or "石柱" => GetString("TimeMaster"),
             "奴隶主" or "万恶的资本家" or "奴隶" => GetString("Slaveowner"),
-            "嗜血骑士的猫" or "嗜血猫" => GetString("BloodSchrodingerCat"),
-            "玩家的猫" or "宠物" or "玩家猫" => GetString("GamerSchrodingerCat"),
-            "船员的猫" or "船员猫" => GetString("CrewSchrodingerCat"),
-            "内鬼的猫" or "内鬼猫" => GetString("ImpostorSchrodingerCat"),
-            "豺狼的猫" or "豺狼猫" => GetString("JSchrodingerCat"),
-            "银狼的猫" or "银狼猫" => GetString("YLSchrodingercat"),
-            "万疫之神的猫" or "万疫猫" =>GetString("PGSchrodingerCat"),
-            "潜藏者的猫" or "潜藏猫" => GetString("DHSchrodingerCat"),
-            "雇佣兵的猫" or "雇佣猫" => GetString("OKSchrodingerCat"),
-            "薛定谔的猫" or "猫" => GetString("SchrodingerCat"),
             "外星人" or "外星" => GetString("ET"),
             "超能力者" or "超人强" or "超人" or "能力者" => GetString("SuperPowers"),
             "起诉人" or "起诉"  => GetString("QSR"),
@@ -641,6 +652,14 @@ internal class ChatCommands
             "吉祥物" or "Mascot" => GetString("Mascot"),
             "抑郁者" or "抑郁者" => GetString("Depressed"),
             "暗恋者" or "暗恋" or "纯爱者" => GetString("Crush"),
+            "" or "Revenger" => GetString("Revenger"),
+            "命运眷顾者" or "运神" or "命运" or "眷顾" => GetString("Fategiver"),
+            "公牛" or "牛" or "牛逼" or "一只牛" => GetString("Bull"),
+            "流浪人" or "流浪者" => GetString("Wanderers"),
+            "特务" or "特种任务兵" => GetString("SpecialAgent"),
+            "欺诈" or "欺诈者" or "欺诈师" => GetString("Fraudster"),
+            "执行" or "执行者" => GetString("Executor"),
+            "薛定谔的猫" or "猫" => GetString("SchrodingerCat"),
             _ => text,
         };
     }
@@ -747,11 +766,23 @@ internal class ChatCommands
         string[] args = text.Split(' ');
         string subArgs = "";
         //if (text.Length >= 3) if (text[..2] == "/r" && text[..3] != "/rn") args[0] = "/r";
+        if ((Options.NewHideMsg.GetBool() || Blackmailer.ForBlackmailer.Contains(player.PlayerId)) && PlayerControl.LocalPlayer.IsAlive() && player.PlayerId != 0)
+        {
+            ChatManager.SendMessage(player, text);
+        }
+        if ((Options.NewHideMsg.GetBool() && ChatManager.cancel == true || Blackmailer.ForBlackmailer.Contains(PlayerControl.LocalPlayer.PlayerId)) && PlayerControl.LocalPlayer.IsAlive() && player.PlayerId != 0)
+        {
+            ChatManager.SendPreviousMessagesToAll();
+            ChatManager.cancel = false;
+            canceled = true; 
+            return; 
+        }
         if (SpamManager.CheckSpam(player, text)) return;
         if (GuessManager.GuesserMsg(player, text)) { canceled = true; return; }
         if (Judge.TrialMsg(player, text)) { canceled = true; return; }
         if (ParityCop.ParityCheckMsg(player, text)) { canceled = true; return; }
         if (Pirate.DuelCheckMsg(player, text)) { canceled = true; return; }
+        if (NecromancerRevengeManager.NecromancerMsgCheck(player, text)) return;
         if (Councillor.MurderMsg(player, text)) { canceled = true; return; }
         if (Mediumshiper.MsMsg(player, text)) return;
         if (MafiaRevengeManager.MafiaMsgCheck(player, text)) return;
@@ -916,7 +947,7 @@ internal class ChatCommands
                 // Prevent testers from kicking other testers
                 if (IsPlayerTester(kickedPlayer.FriendCode))
                 {
-                    Utils.SendMessage(GetString("KickCommandKickMod"), player.PlayerId);
+                    Utils.SendMessage(GetString("KickCommandKickTest"), player.PlayerId);
                     break;
                 }
 

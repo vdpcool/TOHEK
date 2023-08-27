@@ -1,5 +1,7 @@
+using System;
 using HarmonyLib;
 using TMPro;
+using UnityEngine;
 
 namespace TOHE.Patches;
 
@@ -19,8 +21,13 @@ public class EndGameManagerPatch
         {
             Logger.Msg("Beginning Auto Play Again Countdown!", "AutoPlayAgain");
             IsRestarting = true;
-            BeginAutoPlayAgainCountdown(__instance, Options.AutoPlayAgainCountdown.GetInt());
+            BeginAutoPlayAgainCountdown(__instance, WaitForSeconds(1));
         }, 0.5f, "Auto Play Again");
+    }
+
+    private static int WaitForSeconds(int v)
+    {
+        throw new NotImplementedException();
     }
 
     public static void CancelPlayAgain()

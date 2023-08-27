@@ -64,7 +64,7 @@ internal class ChangeRoleSettings
             Main.BoobyTrapBody = new();
             Main.TimeMasterbacktrack = new();
             Main.TimeStopsstop = new();
-            Main.isseniormanagementDead = false;
+            Main.IsSeniormanagementDead = false;
             Main.JealousyMax = new();
             Main.SlaveownerMax = new();
             Main.ForSlaveowner = new();
@@ -88,6 +88,15 @@ internal class ChangeRoleSettings
             Main.ManipulatorCrewmate = new();
             Main.ManipulatorNeutral = new();
             Main.CrushMax = new();
+            Main.ForHemophobia = new();
+            Main.BurstBodies = new();
+            Main.NecromancerRevenged = new();
+            Main.ForYandere = new();
+            Main.NeedKillYandere = new();
+            Main.FakeMath = new();
+            Main.FakeMax = new();
+            Main.NotKiller = new();
+            Main.TomKill = new();
             Main.InfectedBodies = new();
             Main.VirusNotify = new();
 
@@ -127,6 +136,8 @@ internal class ChangeRoleSettings
             Main.ScoutCrewmate = new();
             Main.ScoutNeutral = new();
             Main.ForSourcePlague = new();
+            Main.NnurseHelepMax = new();
+            Main.BullKillMax = new();
             Main.JinxSpellCount = new();
             Main.OverDeadPlayerList = new();
             Main.Provoked = new();
@@ -137,6 +148,7 @@ internal class ChangeRoleSettings
             Main.DovesOfNeaceNumOfUsed = new();
             Main.RudepeopleNumOfUsed = new();
             Main.ShamanTarget = byte.MaxValue;
+            Main.ShamanTargetChoosen = false;
 
             ReportDeadBodyPatch.CanReport = new();
 
@@ -228,6 +240,16 @@ internal class ChangeRoleSettings
             QSR.Init();
             ElectOfficials.Init();
             BSR.Init();
+            Banshee.Init();
+            Seeker.Init();
+            Romantic.Init();
+            VengefulRomantic.Init();
+            RuthlessRomantic.Init();
+            Blackmailer.Init();
+            PlagueDoctor.Init();
+            Yandere.Init();
+            SchrodingerCat.Init();
+            RewardOfficer.Init();
             Lawyer.Init();
             Jackal.Init();
             Sheriff.Init();
@@ -369,7 +391,8 @@ internal class SelectRolesPatch
             // 注册反职业
             foreach (var kv in RoleResult.Where(x => x.Value.IsDesyncRole()))
                 AssignDesyncRole(kv.Value, kv.Key, senders, rolesMap, BaseRole: kv.Value.GetDYRole());
-
+            foreach (var sa in RoleResult.Where(x => x.Value == CustomRoles.SpecialAgent))
+                AssignDesyncRole(sa.Value, sa.Key, senders, rolesMap, BaseRole: RoleTypes.Crewmate, hostBaseRole: RoleTypes.Impostor);
 
             MakeDesyncSender(senders, rolesMap);
 
@@ -397,6 +420,11 @@ internal class SelectRolesPatch
                     Logger.Warn($"注册原版职业 => {sd.Item1.GetRealName()}: {sd.Item2}", "Override Role Select");
                 else
                     Logger.Warn($"覆盖原版职业 => {sd.Item1.GetRealName()}: {sd.Item2} => {kp.Value.GetRoleTypes()}", "Override Role Select");
+                if (kp.Value.IsDesyncRole() || kp.Value == CustomRoles.SpecialAgent)
+                {
+                    Logger.Warn($"反向原版职业 => {sd.Item1.GetRealName()}: {sd.Item2}", "Override Role Select");
+                    continue;
+                }
             }
             if (Options.EnableGM.GetBool()) newList.Add((PlayerControl.LocalPlayer, RoleTypes.Crewmate));
             RpcSetRoleReplacer.StoragedData = newList;
@@ -540,7 +568,7 @@ internal class SelectRolesPatch
                     case CustomRoles.Executioner:
                         Executioner.Add(pc.PlayerId);
                         break;
-                   case CustomRoles.Copycat:
+                    case CustomRoles.Copycat:
                         Copycat.Add(pc.PlayerId);
                         break;
                     case CustomRoles.PlatonicLover:
@@ -610,6 +638,40 @@ internal class SelectRolesPatch
                         break;
                     case CustomRoles.Crush:
                         Main.CrushMax[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.Nurse:
+                        Main.NnurseHelepMax[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.Bull:
+                        Main.BullKillMax[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.Banshee:
+                        Banshee.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.Necromancer:
+                        Necromancer.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.Blackmailer:
+                        Blackmailer.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.PlagueDoctor:
+                        PlagueDoctor.Add(pc.PlayerId);
+                        PlagueDoctor.CanInfectInt[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.Yandere:
+                        Yandere.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.Fake:
+                        Main.FakeMax[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.Tom:
+                        Main.TomKill[pc.PlayerId] = 0;
+                        break;
+                    case CustomRoles.SchrodingerCat:
+                        SchrodingerCat.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.RewardOfficer:
+                        RewardOfficer.Add(pc.PlayerId);
                         break;
                     case CustomRoles.Lawyer:
                         Lawyer.Add(pc.PlayerId);
@@ -849,6 +911,18 @@ internal class SelectRolesPatch
                         break;
                     case CustomRoles.Pirate:
                         Pirate.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.Seeker:
+                        Seeker.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.Romantic:
+                        Romantic.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.VengefulRomantic:
+                        VengefulRomantic.Add(pc.PlayerId);
+                        break;
+                    case CustomRoles.RuthlessRomantic:
+                        RuthlessRomantic.Add(pc.PlayerId);
                         break;
                 }
                 foreach (var subRole in pc.GetCustomSubRoles())

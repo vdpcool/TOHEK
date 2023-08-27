@@ -110,6 +110,9 @@ public static class HudSpritePatch
             case CustomRoles.Crush:
                 newKillButton = CustomButton.Get("Subbus");
                 break;
+            case CustomRoles.PlagueDoctor:
+                newKillButton = CustomButton.Get("InfectButton");
+                break;
             case CustomRoles.Camouflager:
                 newAbilityButton = CustomButton.Get("Camo");
                 break;

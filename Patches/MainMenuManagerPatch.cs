@@ -11,8 +11,6 @@ namespace TOHE;
 public class MainMenuManagerPatch
 {
     public static GameObject template;
-    public static GameObject qqButton;
-    public static GameObject discordButton;
     public static GameObject updateButton;
 
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start)), HarmonyPrefix]
@@ -20,43 +18,6 @@ public class MainMenuManagerPatch
     {
         if (template == null) template = GameObject.Find("/MainUI/ExitGameButton");
         if (template == null) return;
-
-        //if (CultureInfo.CurrentCulture.Name == "zh-CN")
-        {
-            //生成QQ群按钮
-            if (qqButton == null) qqButton = Object.Instantiate(template, template.transform.parent);
-            qqButton.name = "qqButton";
-            qqButton.transform.position = Vector3.Reflect(template.transform.position, Vector3.left);
-
-            var qqText = qqButton.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
-            Color qqColor = new Color32(0, 164, 255, byte.MaxValue);
-            PassiveButton qqPassiveButton = qqButton.GetComponent<PassiveButton>();
-            SpriteRenderer qqButtonSprite = qqButton.GetComponent<SpriteRenderer>();
-            qqPassiveButton.OnClick = new();
-            qqPassiveButton.OnClick.AddListener((Action)(() => Application.OpenURL(Main.QQInviteUrl)));
-            qqPassiveButton.OnMouseOut.AddListener((Action)(() => qqButtonSprite.color = qqText.color = qqColor));
-            __instance.StartCoroutine(Effects.Lerp(0.01f, new Action<float>((p) => qqText.SetText("QQ群"))));
-            qqButtonSprite.color = qqText.color = qqColor;
-            qqButton.gameObject.SetActive(Main.ShowQQButton && !Main.IsAprilFools);
-        }
-        //else
-        {
-            //Discordボタンを生成
-            if (discordButton == null) discordButton = Object.Instantiate(template, template.transform.parent);
-            discordButton.name = "DiscordButton";
-            discordButton.transform.position = Vector3.Reflect(template.transform.position, Vector3.left);
-
-            var discordText = discordButton.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
-            Color discordColor = new Color32(86, 98, 246, byte.MaxValue);
-            PassiveButton discordPassiveButton = discordButton.GetComponent<PassiveButton>();
-            SpriteRenderer discordButtonSprite = discordButton.GetComponent<SpriteRenderer>();
-            discordPassiveButton.OnClick = new();
-            discordPassiveButton.OnClick.AddListener((Action)(() => Application.OpenURL(Main.DiscordInviteUrl)));
-            discordPassiveButton.OnMouseOut.AddListener((Action)(() => discordButtonSprite.color = discordText.color = discordColor));
-            __instance.StartCoroutine(Effects.Lerp(0.01f, new Action<float>((p) => discordText.SetText("Discord"))));
-            discordButtonSprite.color = discordText.color = discordColor;
-            discordButton.gameObject.SetActive(Main.ShowDiscordButton && !Main.IsAprilFools);
-        }
 
         ////Updateボタンを生成
         if (updateButton == null) updateButton = Object.Instantiate(template, template.transform.parent);
@@ -79,16 +40,12 @@ public class MainMenuManagerPatch
         updateButtonSprite.size *= 1.5f;
         updateButton.SetActive(false);
 
-#if RELEASE
-        //フリープレイの無効化
-        var freeplayButton = GameObject.Find("/MainUI/FreePlayButton");
-            if (freeplayButton != null)
-            {
-                freeplayButton.GetComponent<PassiveButton>().OnClick = new();
-                freeplayButton.GetComponent<PassiveButton>().OnClick.AddListener((Action)(() => Application.OpenURL("https://toher.vercel.app/")));
-                __instance.StartCoroutine(Effects.Lerp(0.01f, new Action<float>((p) => freeplayButton.transform.GetChild(0).GetComponent<TMPro.TMP_Text>().SetText(Translator.GetString("Website")))));
-            }
-#endif
+        var howToPlayButton = __instance.howToPlayButton;
+        var freeplayButton = howToPlayButton.transform.parent.Find("FreePlayButton");
+        
+        if (freeplayButton != null) freeplayButton.gameObject.SetActive(false);
+
+        howToPlayButton.transform.SetLocalX(0);
 
         if (Main.IsAprilFools) return;
 

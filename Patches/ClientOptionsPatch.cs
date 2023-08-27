@@ -1,5 +1,4 @@
 using HarmonyLib;
-using TOHE.Patches;
 using UnityEngine;
 
 namespace TOHE;
@@ -20,6 +19,9 @@ public static class OptionsMenuBehaviourStartPatch
     private static ClientOptionItem CanPublic;
     private static ClientOptionItem ModeForSmallScreen;
     private static ClientOptionItem ShowLobbyCode;
+    private static ClientOptionItem AutoCreateRoom;
+    private static ClientOptionItem AutoCopyGameCode;
+    private static ClientOptionItem DownloadNewNamePlates;
     //private static ClientOptionItem VersionCheat;
     //private static ClientOptionItem GodMode;
 
@@ -111,6 +113,18 @@ public static class OptionsMenuBehaviourStartPatch
         if (ShowLobbyCode == null || ShowLobbyCode.ToggleButton == null)
         {
             ShowLobbyCode = ClientOptionItem.Create("ShowLobbyCode", Main.ShowLobbyCode, __instance);
+        }
+        if (AutoCreateRoom == null || AutoCreateRoom.ToggleButton == null)
+        {
+            AutoCreateRoom = ClientOptionItem.Create("AutoCreateRoom", Main.AutoCreateRoom, __instance);
+        }
+        if (AutoCopyGameCode == null || AutoCopyGameCode.ToggleButton == null)
+        {
+            AutoCopyGameCode = ClientOptionItem.Create("AutoCopyGameCode", Main.AutoCopyGameCode, __instance);
+        }
+        if (DownloadNewNamePlates == null || DownloadNewNamePlates.ToggleButton == null)
+        {
+            DownloadNewNamePlates = ClientOptionItem.Create("DownloadNewNamePlates", Main.DownloadNewNamePlates, __instance);
         }
         /*      if ((VersionCheat == null || VersionCheat.ToggleButton == null) && DebugModeManager.AmDebugger)
                 {

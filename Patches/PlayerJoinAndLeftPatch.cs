@@ -129,10 +129,14 @@ class OnPlayerLeftPatch
                 foreach (var pc in PlayerControl.AllPlayerControls.ToArray())
                 {
                     if (pc.Is(CustomRoles.Solicited))
-                    Main.isseniormanagementDead = true;
+                    Main.IsSeniormanagementDead = true;
                     Main.PlayerStates[pc.PlayerId].RemoveSubRole(CustomRoles.Captain);
                     Main.PlayerStates[pc.PlayerId].RemoveSubRole(CustomRoles.Solicited);
                 }
+            if (data.Character.Is(CustomRoles.Yandere) && Yandere.Target.ContainsKey(data.Character.PlayerId))
+                Yandere.ChangeRole(data.Character);
+            if (Yandere.Target.ContainsValue(data.Character.PlayerId))
+                Yandere.ChangeRoleByTarget(data.Character); 
             if (data.Character.Is(CustomRoles.Executioner) && Executioner.Target.ContainsKey(data.Character.PlayerId))
                 Executioner.ChangeRole(data.Character);
             if (Executioner.Target.ContainsValue(data.Character.PlayerId))

@@ -60,8 +60,8 @@ class GameEndChecker
                 case CustomWinner.Crewmate:
                     foreach (var pc in PlayerControl.AllPlayerControls)
                     {
-                        if(pc.Is(CustomRoleTypes.Crewmate) && !pc.Is(CustomRoles.Lovers)
-                            && !(pc.Is(CustomRoles.Bakery) && TOHE.Roles.Crewmate.Bakery.IsNeutral(pc)))
+                        if(pc.Is(CustomRoleTypes.Crewmate) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Fugitive)
+                            && !(pc.Is(CustomRoles.Bakery) && Roles.Crewmate.Bakery.IsNeutral(pc)) && !Main.ForFake.Contains(pc.PlayerId))
                         {
                             CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
                         }
@@ -69,12 +69,12 @@ class GameEndChecker
                     break;
                 case CustomWinner.Impostor:
                     Main.AllPlayerControls
-                        .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoles.Madmate)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Rogue) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Infected) && !pc.Is(CustomRoles.Contagious) && !pc.Is(CustomRoles.EvilSpirit) && (!pc.Is(CustomRoles.Sidekick) && !pc.Is(CustomRoles.seniormanagement)/* && !Jackal.SidekickCanWinWithOriginalTeam.GetBool()*/))
+                        .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoles.Madmate) || pc.Is(CustomRoles.Refugee)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Rogue) && !pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Infected) && !pc.Is(CustomRoles.Contagious) && !pc.Is(CustomRoles.EvilSpirit) && !pc.Is(CustomRoles.Sidekick) && !pc.Is(CustomRoles.Seniormanagement) && !Main.ForFake.Contains(pc.PlayerId)/* && !Jackal.SidekickCanWinWithOriginalTeam.GetBool()*/)
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
                 case CustomWinner.Succubus:
                     Main.AllPlayerControls
-                        .Where(pc => pc.Is(CustomRoles.Succubus) || pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Rogue))
+                        .Where(pc => pc.Is(CustomRoles.Succubus) || pc.Is(CustomRoles.Charmed) && !pc.Is(CustomRoles.Rogue) || !Main.ForFake.Contains(pc.PlayerId))
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
                 case CustomWinner.CursedSoul:
@@ -94,22 +94,54 @@ class GameEndChecker
                     break;
                 case CustomWinner.Jackal:
                     Main.AllPlayerControls
-                        .Where(pc => pc.Is(CustomRoles.Jackal) || pc.Is(CustomRoles.Whoops) || pc.Is(CustomRoles.Sidekick))
+                        .Where(pc => pc.Is(CustomRoles.Jackal) || pc.Is(CustomRoles.Whoops) || pc.Is(CustomRoles.Sidekick) || pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isjac == true)
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
                 case CustomWinner.YinLang:
                     Main.AllPlayerControls
-                        .Where(pc => pc.Is(CustomRoles.YinLang))
+                        .Where(pc => pc.Is(CustomRoles.YinLang) || pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isyl == true || !Main.ForFake.Contains(pc.PlayerId))
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
                 case CustomWinner.MengJiangGirl:
                     Main.AllPlayerControls
-                        .Where(pc => pc.Is(CustomRoles.MengJiangGirl))
+                        .Where(pc => pc.Is(CustomRoles.MengJiangGirl) || !Main.ForFake.Contains(pc.PlayerId))
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
                 case CustomWinner.Spiritcaller:
                     Main.AllPlayerControls
-                        .Where(pc => (pc.Is(CustomRoles.Spiritcaller) || pc.Is(CustomRoles.EvilSpirit)))
+                        .Where(pc => pc.Is(CustomRoles.Spiritcaller) || pc.Is(CustomRoles.EvilSpirit))
+                        .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
+                    break;
+                case CustomWinner.RuthlessRomantic:
+                    foreach (var pc in Main.AllPlayerControls)
+                    {
+                        if (pc.Is(CustomRoles.RuthlessRomantic))
+                        {
+                            CustomWinnerHolder.WinnerIds.Add(Romantic.BetPlayer[pc.PlayerId]);
+                        }
+                    }
+                    //Main.AllPlayerControls
+                    //    .Where(pc => (pc.Is(CustomRoles.RuthlessRomantic) || (Romantic.BetPlayer.TryGetValue(pc.PlayerId, out var RomanticPartner)) && pc.PlayerId == RomanticPartner))
+                    //    .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
+                    break;
+                case CustomWinner.Yandere:
+                    Main.AllPlayerControls
+                        .Where(pc => Main.ForYandere.Contains(pc.PlayerId) || pc.Is(CustomRoles.Yandere) || !Main.ForFake.Contains(pc.PlayerId))
+                        .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
+                    break;
+                case CustomWinner.BloodKnight:
+                    Main.AllPlayerControls
+                        .Where(pc => pc.Is(CustomRoles.BloodKnight) || pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isbk == true || !Main.ForFake.Contains(pc.PlayerId))
+                        .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
+                    break;
+                case CustomWinner.Gamer:
+                    Main.AllPlayerControls
+                        .Where(pc => pc.Is(CustomRoles.Gamer) || pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isgam == true || !Main.ForFake.Contains(pc.PlayerId))
+                        .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
+                    break;
+                case CustomWinner.PlaguesGod:
+                    Main.AllPlayerControls
+                        .Where(pc => pc.Is(CustomRoles.PlaguesGod) || pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.ispg == true || !Main.ForFake.Contains(pc.PlayerId))
                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                     break;
             }
@@ -118,7 +150,7 @@ class GameEndChecker
                 //潜藏者抢夺胜利
                 foreach (var pc in Main.AllPlayerControls)
                 {
-                    if (pc.Is(CustomRoles.DarkHide) && !pc.Data.IsDead
+                if (pc.Is(CustomRoles.DarkHide) && !pc.Data.IsDead
                         && ((CustomWinnerHolder.WinnerTeam == CustomWinner.Impostor && !reason.Equals(GameOverReason.ImpostorBySabotage)) || CustomWinnerHolder.WinnerTeam == CustomWinner.DarkHide
                         || (CustomWinnerHolder.WinnerTeam == CustomWinner.Crewmate && !reason.Equals(GameOverReason.HumansByTask) && DarkHide.IsWinKill[pc.PlayerId] == true)))
                     {
@@ -126,10 +158,23 @@ class GameEndChecker
                         CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
                         foreach (var player in Main.AllPlayerControls)
                         {
-                            if (player.Is(CustomRoles.DHSchrodingerCat))
+                            if (player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isdh)
                             {
                                 CustomWinnerHolder.WinnerIds.Add(player.PlayerId);
-                                CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.DHCat);
+                            }
+                        }
+                    }
+                    else if (pc.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isdh && !pc.Data.IsDead
+                        && ((CustomWinnerHolder.WinnerTeam == CustomWinner.Impostor && !reason.Equals(GameOverReason.ImpostorBySabotage)) || CustomWinnerHolder.WinnerTeam == CustomWinner.DarkHide
+                        || (CustomWinnerHolder.WinnerTeam == CustomWinner.Crewmate && !reason.Equals(GameOverReason.HumansByTask) && DarkHide.IsWinKill[pc.PlayerId] == true)))
+                    {
+                        CustomWinnerHolder.ResetAndSetWinner(CustomWinner.DarkHide);
+                        CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                        foreach (var player in Main.AllPlayerControls)
+                        {
+                            if (player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isdh)
+                            {
+                                CustomWinnerHolder.WinnerIds.Add(player.PlayerId);
                             }
                         }
                     }
@@ -266,10 +311,36 @@ class GameEndChecker
                         CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
                         CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.Slaveowner);
                     }
-                    if (pc.Is(CustomRoles.OKSchrodingerCat) && pc.IsAlive())
+                    if (pc.Is(CustomRoles.Fake) && pc.IsAlive() && Main.NeedFake.TryGetValue(pc.PlayerId, out var tr))
                     {
-                        CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
-                        CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.OKC);
+                            if (!CustomWinnerHolder.WinnerIds.Contains(tr))
+                            {
+                                CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                                CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.Provocateur);
+                            }
+                            CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                        CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.FreeMan);
+                    }
+                    foreach (var player in Main.AllPlayerControls)
+                    {
+                        if (pc.Is(CustomRoles.OpportunistKiller) && pc.IsAlive() || player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && player.IsAlive())
+                        {
+                            CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                            CustomWinnerHolder.WinnerIds.Add(player.PlayerId);
+                            CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.OpportunistKiller);
+                        }
+                        else if (pc.Is(CustomRoles.OpportunistKiller) && pc.IsAlive() && player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && !player.IsAlive())
+                        {
+                            CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                            CustomWinnerHolder.WinnerIds.Add(player.PlayerId);
+                            CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.OpportunistKiller);
+                        }
+                        else if (pc.Is(CustomRoles.OpportunistKiller) && !pc.IsAlive() && player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.isok == true && player.IsAlive())
+                        {
+                            CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                            CustomWinnerHolder.WinnerIds.Add(player.PlayerId);
+                            CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.OpportunistKiller);
+                        }
                     }
                     if (pc.Is(CustomRoles.Maverick) && pc.IsAlive())
                     {
@@ -343,6 +414,42 @@ class GameEndChecker
                     {
                         CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
                         CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.Lawyer);
+                    }
+                }
+                //Romantic win condition
+                foreach (var pc in Main.AllPlayerControls.Where(x => x.Is(CustomRoles.Romantic)))
+                {
+                    if (Romantic.BetPlayer.TryGetValue(pc.PlayerId, out var betTarget) && (
+                        CustomWinnerHolder.WinnerIds.Contains(betTarget) ||
+                        (Main.PlayerStates.TryGetValue(betTarget, out var ps) && CustomWinnerHolder.WinnerRoles.Contains(ps.MainRole)
+                        )))
+                    {
+                        CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                        CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.Romantic);
+                    }
+                }
+                foreach (var pc in Main.AllPlayerControls.Where(x => x.Is(CustomRoles.RuthlessRomantic)))
+                {
+                    if (Romantic.BetPlayer.TryGetValue(pc.PlayerId, out var betTarget) && (
+                        CustomWinnerHolder.WinnerIds.Contains(betTarget) ||
+                        (Main.PlayerStates.TryGetValue(betTarget, out var ps) && CustomWinnerHolder.WinnerRoles.Contains(ps.MainRole)
+                        )))
+                    {
+                        CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                        CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.RuthlessRomantic);
+                    }
+                }
+                
+                //Vengeful Romantic win condition
+                foreach (var pc in Main.AllPlayerControls.Where(x => x.Is(CustomRoles.VengefulRomantic)))
+                {
+                    if (VengefulRomantic.hasKilledKiller)
+                    {
+                        CustomWinnerHolder.WinnerIds.Add(pc.PlayerId);
+                        CustomWinnerHolder.WinnerIds.Add(Romantic.BetPlayer[pc.PlayerId]);
+                        //if ((Romantic.BetPlayer.TryGetValue(pc.PlayerId, out var RomanticPartner)) && pc.PlayerId == RomanticPartner)
+                        //    CustomWinnerHolder.WinnerIds.Add(RomanticPartner);
+                        CustomWinnerHolder.AdditionalWinnerTeams.Add(AdditionalWinners.VengefulRomantic);
                     }
                 }
                 //中立共同胜利
@@ -509,6 +616,8 @@ class GameEndChecker
             int Glitch = Utils.AlivePlayersCount(CountTypes.Glitch);
             int Coven = Utils.AlivePlayersCount(CountTypes.Coven);
             int PG = Utils.AlivePlayersCount(CountTypes.PlaguesGod);
+            int RR = Utils.AlivePlayersCount(CountTypes.RuthlessRomantic);
+            int Si = Utils.AlivePlayersCount(CountTypes.Yandere);
             int SK = Utils.AlivePlayersCount(CountTypes.NSerialKiller);
             int Witch = Utils.AlivePlayersCount(CountTypes.NWitch);
             int Juggy = Utils.AlivePlayersCount(CountTypes.Juggernaut);
@@ -524,10 +633,11 @@ class GameEndChecker
             int SC = Utils.AlivePlayersCount(CountTypes.Spiritcaller);
 
             Imp += Main.AllAlivePlayerControls.Count(x => x.GetCustomRole().IsImpostor() && x.Is(CustomRoles.DualPersonality));
-            Crew += Main.AllAlivePlayerControls.Count(x => x.GetCustomRole().IsCrewmate() && x.Is(CustomRoles.DualPersonality));
+            Crew += Main.AllAlivePlayerControls.Count(x => x.GetCustomRole().IsCrewmate() && x.Is(CustomRoles.DualPersonality) && x.Is(CustomRoles.EIReverso));
             CM += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Charmed) && x.Is(CustomRoles.DualPersonality));
             Jackal += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Sidekick) && x.Is(CustomRoles.DualPersonality));
             YinLang += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.DualPersonality));
+            Si += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Yandere) || Main.ForYandere.Contains(x.PlayerId));
             Vamp += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Sidekick) && x.Is(CustomRoles.DualPersonality));
             Virus += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Sidekick) && x.Is(CustomRoles.DualPersonality));
             Imp += Main.AllAlivePlayerControls.Count(x => x.Is(CustomRoles.Madmate) && x.Is(CustomRoles.DualPersonality));
@@ -549,6 +659,7 @@ class GameEndChecker
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Parasite);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Crewpostor);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Convict);
+                CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Refugee);
             }
             else if (Imp == 0 && Jackal == 0 && Rit == 0 && Traitor == 0 && Med == 0 && PP == 0 && Gam == 0 && Vamp == 0 && DH == 0 && Rogue == 0 && Juggy == 0 && Arso == 0 && Glitch == 0 && Wraith == 0 && Pestilence == 0 && PB == 0 && SK == 0 && Jinx == 0 && Hex == 0 && Pois == 0 && Virus == 0 && SC == 0 && CM == 0 && BK == 0 && YinLang == 0 && Coven == 0 && Crew <= Pel) //鹈鹕胜利
             {
@@ -630,16 +741,23 @@ class GameEndChecker
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.CovenLeader);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Poisoner);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.HexMaster);
+                CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Necromancer);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Wraith);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Ritualist);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Jinx);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Medusa);
+                CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Banshee);
             }
             else if (Imp == 0 && Jackal == 0 && PP == 0 && Traitor == 0 && Med == 0 && Juggy == 0 && Coven == 0 && Pel == 0 && Vamp == 0 && DH == 0 && Rogue == 0 && Glitch == 0 && SK == 0 && Rit == 0 && Jinx == 0 && Hex == 0 && Wraith == 0 && Pestilence == 0 && PB == 0 && Pois == 0 && Virus == 0 && SC == 0 && BK == 0 && Gam == 0 && CM == 0 && Crew <= Arso) //嗜血骑士胜利
             {
                 reason = GameOverReason.ImpostorByKill;
                 CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Arsonist);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Arsonist);
+            }
+            else if (Jackal < Si && Pel < Si && Imp < Si && BK < Si && Gam < Si && Crew < Si && CM < Si && YinLang < Si) //胜利
+            {
+                reason = GameOverReason.ImpostorByKill;
+                CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Yandere);
             }
             else if (Imp == 0 && Jackal == 0 && PP == 0 && Traitor == 0 && Med == 0 && Pel == 0 && Rit == 0 && Vamp == 0 && DH == 0 && Rogue == 0 && Jinx == 0 && Juggy == 0 && Coven == 0 && Arso == 0 && Glitch == 0 && Hex == 0 && SK == 0 && Wraith == 0 && Pestilence == 0 && PB == 0 && BK == 0 && Gam == 0 && Pois == 0 && Virus == 0 && SC == 0 && YinLang == 0 && Crew <= CM) //嗜血骑士胜利
             {
@@ -720,7 +838,12 @@ class GameEndChecker
                 CustomWinnerHolder.ResetAndSetWinner(CustomWinner.PlaguesGod);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.PlaguesGod);
             }
-            
+            else if (Imp == 0 && Jackal == 0 && PP == 0 && Traitor == 0 && Med == 0 && Arso == 0 && Pel == 0 && Vamp == 0 && DH == 0 && Rogue == 0 && Coven == 0 && Glitch == 0 && SK == 0 && Rit == 0 && Jinx == 0 && Hex == 0 && Pestilence == 0 && PB == 0 && Pois == 0 && Virus == 0 && SC == 0 && BK == 0 && Gam == 0 && CM == 0 && Juggy == 0 && Crew <= RR) //嗜血骑士胜利
+            {
+                reason = GameOverReason.ImpostorByKill;
+                CustomWinnerHolder.ResetAndSetWinner(CustomWinner.RuthlessRomantic);
+                CustomWinnerHolder.WinnerRoles.Add(CustomRoles.RuthlessRomantic);
+            }
             else return false; //胜利条件未达成
 
             return true;

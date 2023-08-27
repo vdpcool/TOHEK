@@ -64,6 +64,9 @@ class HudManagerPatch
                 //MOD入り用のボタン下テキスト変更
                 switch (player.GetCustomRole())
                 {
+                    case CustomRoles.Banshee:
+                    case CustomRoles.Necromancer:
+                    case CustomRoles.Refugee:
                     case CustomRoles.Sniper:
                         Sniper.OverrideShapeText(player.PlayerId);
                         break;
@@ -96,6 +99,9 @@ class HudManagerPatch
                         break;
                     case CustomRoles.ElectOfficials:
                         __instance.KillButton.OverrideText(GetString("ElectOfficialsKillButtonText"));
+                        break;
+                    case CustomRoles.SpeedUp:
+                        __instance.KillButton.OverrideText(GetString("SpeedUpKillButtonText"));
                         break;
                     case CustomRoles.Miner:
                         __instance.AbilityButton.OverrideText(GetString("MinerTeleButtonText"));
@@ -306,6 +312,9 @@ class HudManagerPatch
                     case CustomRoles.SourcePlague:
                         __instance.KillButton.OverrideText(GetString("SourcePlagueKillButtonText"));
                         break;
+                    case CustomRoles.PlagueDoctor:
+                            __instance.KillButton.OverrideText(GetString("PlagueDoctorKillButtonText"));
+                        break;
                     case CustomRoles.Totocalcio:
                         __instance.KillButton.OverrideText(GetString("TotocalcioKillButtonText"));
                         break;
@@ -403,6 +412,10 @@ class HudManagerPatch
                 else if (player.Is(CustomRoles.Wildling))
                 {
                     LowerInfoText.text = Wildling.GetHudText(player);
+                }
+                else if (player.Is(CustomRoles.Banshee))
+                {
+                    LowerInfoText.text = Banshee.GetHudText(player);
                 }
                 else
                 {
@@ -556,6 +569,7 @@ class SetHudActivePatch
                 __instance.ReportButton.ToggleVisible(false);
                 break;
             case CustomRoles.Parasite:
+            case CustomRoles.Refugee:
                 __instance.SabotageButton.ToggleVisible(true);
                 break;
             case CustomRoles.Jackal:
@@ -607,7 +621,7 @@ class MapBehaviourShowPatch
         if (opts.Mode is MapOptions.Modes.Normal or MapOptions.Modes.Sabotage)
         {
             var player = PlayerControl.LocalPlayer;
-            if (player.Is(CustomRoleTypes.Impostor) || (player.Is(CustomRoles.Parasite)) || (player.Is(CustomRoles.Jackal) && Jackal.CanUseSabotage.GetBool()) || (player.Is(CustomRoles.Traitor) && Traitor.CanUseSabotage.GetBool()) || (player.Is(CustomRoles.ET)))
+            if (player.Is(CustomRoleTypes.Impostor) || (player.Is(CustomRoles.Parasite)) || (player.Is(CustomRoles.Refugee)) || (player.Is(CustomRoles.Jackal) && Jackal.CanUseSabotage.GetBool()) || (player.Is(CustomRoles.Traitor) && Traitor.CanUseSabotage.GetBool()) || player.Is(CustomRoles.ET))
                 opts.Mode = MapOptions.Modes.Sabotage;
             else
                 opts.Mode = MapOptions.Modes.Normal;

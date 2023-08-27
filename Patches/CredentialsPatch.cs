@@ -1,4 +1,6 @@
 using HarmonyLib;
+using System;
+using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -8,13 +10,15 @@ using static TOHE.Translator;
 namespace TOHE;
 
 [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
-internal class PingTrackerUpdatePatch
+
+[HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
+class PingTrackerUpdatePatch
 {
     private static readonly StringBuilder sb = new();
 
     private static void Postfix(PingTracker __instance)
     {
-        __instance.text.alignment = TextAlignmentOptions.TopRight;
+         __instance.text.alignment = TextAlignmentOptions.TopRight;
 
         sb.Clear();
 
@@ -147,12 +151,11 @@ internal class TitleLogoPatch
     //public static GameObject PlayLocalButton;
     //public static GameObject PlayOnlineButton;
     //public static GameObject HowToPlayButton;
-    //public static GameObject FreePlayButton;
     //public static GameObject BottomButtons;
 
     private static void Postfix(MainMenuManager __instance)
     {
-      /*if (Main.IsAprilFools)
+        /*if (Main.IsAprilFools)
         {
             if ((amongUsLogo = GameObject.Find("bannerLogo_AmongUs")) != null)
             {
@@ -175,7 +178,7 @@ internal class TitleLogoPatch
             amongUsLogo.transform.position += Vector3.up * 0.25f;
         }
 
-        /* if ((PlayLocalButton = GameObject.Find("PlayLocalButton")) != null)
+        /*if ((PlayLocalButton = GameObject.Find("PlayLocalButton")) != null)
         {
             PlayLocalButton.transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
             PlayLocalButton.transform.position = new Vector3(-0.76f, -2.1f, 0f);
@@ -205,21 +208,113 @@ internal class TitleLogoPatch
             BottomButtons.transform.position = new Vector3(0f, -2.71f, 0f);
         }*/
 
-     /*   if ((Ambience = GameObject.Find("Ambience")) != null)
+        /*if ((Ambience = GameObject.Find("Ambience")) != null)
         {
             Ambience.SetActive(false);
             var CustomBG = new GameObject("CustomBG");
             CustomBG.transform.position = new Vector3(2.095f, -0.25f, 520f);
             var bgRenderer = CustomBG.AddComponent<SpriteRenderer>();
             bgRenderer.sprite = Utils.LoadSprite("TOHE.Resources.Images.TOHEK-BG.jpg", 245f);
-        } */
+        }*/
         if ((Ambience = GameObject.Find("Ambience")) != null)
         {
-            Ambience.SetActive(false);
-            var CustomBG = new GameObject("CustomBG");
-            CustomBG.transform.position = new Vector3(2.095f, -0.25f, 520f);
-            var bgRenderer = CustomBG.AddComponent<SpriteRenderer>();
-            bgRenderer.sprite = Utils.LoadSprite("TOHE.Resources.Images.TOHEK-BG.jpg", 245f);
+            try
+            {
+                SpriteRenderer activeSpriteRender = __instance.playButton.activeSprites.GetComponent<SpriteRenderer>();
+                activeSpriteRender.color = new Color(100f, 75f, 80f);
+
+                SpriteRenderer inactiveSpriteRender = __instance.playButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                inactiveSpriteRender.color = new Color(100f, 75f, 80f);
+                inactiveSpriteRender.sprite = activeSpriteRender.sprite;
+
+                __instance.playButton.activeTextColor = Color.white;
+                __instance.playButton.inactiveTextColor = Color.white;
+
+                __instance.inventoryButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.inventoryButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.inventoryButton.activeTextColor = Color.white;
+                __instance.inventoryButton.inactiveTextColor = Color.white;
+
+                __instance.shopButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.shopButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.shopButton.activeTextColor = Color.white;
+                __instance.shopButton.inactiveTextColor = Color.white;
+
+                __instance.newsButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.newsButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.newsButton.activeTextColor = Color.white;
+                __instance.newsButton.inactiveTextColor = Color.white;
+
+                __instance.myAccountButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.myAccountButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.myAccountButton.activeTextColor = Color.white;
+                __instance.myAccountButton.inactiveTextColor = Color.white;
+
+                __instance.settingsButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.settingsButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.settingsButton.activeTextColor = Color.white;
+                __instance.settingsButton.inactiveTextColor = Color.white;
+
+                __instance.quitButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.quitButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.quitButton.activeTextColor = Color.white;
+                __instance.quitButton.inactiveTextColor = Color.white;
+
+                __instance.creditsButton.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.creditsButton.activeSprites.GetComponent<SpriteRenderer>().color = new Color(100f, 75f, 80f);
+                __instance.creditsButton.activeTextColor = Color.white;
+                __instance.creditsButton.inactiveTextColor = Color.white;
+
+                GameObject.Find("WindowShine").transform.gameObject.SetActive(false);
+                GameObject.Find("ScreenCover").transform.gameObject.SetActive(false);
+                GameObject.Find("BackgroundTexture").transform.gameObject.SetActive(false);
+
+                Ambience.SetActive(false);
+                var CustomBG = new GameObject("CustomBG");
+                CustomBG.transform.position = new Vector3(0f, 0f, 520f);
+                var bgRenderer = CustomBG.AddComponent<SpriteRenderer>();
+                bgRenderer.sprite = Utils.LoadSprite("TOHE.Resources.Images.TOHEK-BG.png", 245f);
+
+                __instance.screenTint.gameObject.transform.localPosition += new Vector3(1000f, 0f);
+                __instance.screenTint.enabled = false;
+                __instance.rightPanelMask.SetActive(true);
+
+                GameObject leftPanel = GameObject.Find("LeftPanel").transform.gameObject;
+                GameObject rightPanel = GameObject.Find("RightPanel").transform.gameObject;
+                rightPanel.gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                GameObject maskedBlackScreen = GameObject.Find("MaskedBlackScreen").transform.gameObject;
+                maskedBlackScreen.GetComponent<SpriteRenderer>().enabled = false;
+                maskedBlackScreen.transform.localPosition = new Vector3(-2.5f, 0.6f);
+                maskedBlackScreen.transform.localScale = new Vector3(7.35f, 4.5f, 4f);
+
+                GameObject.Find("Shine").transform.gameObject.SetActive(false);
+
+                leftPanel.GetComponentsInChildren<SpriteRenderer>(true).Where(r => r.name == "Shine").Do(r => r.color = new Color(1f, 0f, 0.35f, 0.2f));
+                //leftPanel.GetComponents<SpriteRenderer>().Where(r => r.name == "Shine").Do(r => r.color = new Color(1f, 0f, 0f));
+
+                leftPanel.gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                GameObject.Find("LeftPanel").transform.Find("Divider").gameObject.SetActive(false);
+
+                //__instance.playButton.OnClick = __instance.PlayOnlineButton.OnClick;
+                //new LateTask(() => __instance.playButton.buttonText.text = "Play Online", 0.001f);
+
+                __instance.playButton.transform.localPosition -= new Vector3(0f, 1.4f);
+
+                //PassiveButton playLocalButton = UnityEngine.Object.Instantiate(__instance.playButton, __instance.transform);
+                //playLocalButton.transform.localPosition -= new Vector3(3.4f, 1.5f);
+                //playLocalButton.transform.localScale -= new Vector3(0.16f, 0.2f);
+                //playLocalButton.activeSprites.GetComponent<SpriteRenderer>().color = activeSpriteRender.color;
+
+                //playLocalButton.OnClick = __instance.playLocalButton.OnClick;
+                //new LateTask(() => playLocalButton.buttonText.text = "Play Local", 0.001f);
+
+                PlayerParticles particles = UnityEngine.Object.FindObjectOfType<PlayerParticles>();
+                particles.gameObject.SetActive(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(ex, "Platform");
+            }
         }
     }
 }

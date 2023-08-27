@@ -54,7 +54,7 @@ public class DiscordRPC
         {
             if (activity.State != "In Menus")
             {
-                if (!Main.ShowLobbyCode.Value)
+                if (Main.ShowLobbyCode.Value)
                 {
                     int maxSize = GameOptionsManager.Instance.currentNormalGameOptions.MaxPlayers;
                     if (GameStates.IsLobby)

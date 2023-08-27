@@ -149,6 +149,15 @@ class RpcSetTasksPatch
             NumLongTasks = 1;
         }
 
+        //卷姐的任务覆盖
+        if (pc.Is(CustomRoles.Involution) && TaskState.invbool)
+        {
+            //hasCommonTasks = false;
+            NumLongTasks -= 1;
+            //NumShortTasks = Options.MadSnitchTasks.GetInt();
+            TaskState.invbool = false;
+        }
+
         //加班狂加班咯~
         if (pc.Is(CustomRoles.Workhorse))
             (hasCommonTasks, NumLongTasks, NumShortTasks) = Workhorse.TaskData;

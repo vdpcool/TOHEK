@@ -98,9 +98,10 @@ class RepairSystemPatch
             if (player.Is(CustomRoles.Traitor) && Traitor.CanUseSabotage.GetBool()) return true;
             if (player.Is(CustomRoles.ET)) return true;
             if (player.Is(CustomRoles.Parasite) && (player.IsAlive() || !Options.DeadImpCantSabotage.GetBool())) return true;
+            if (player.Is(CustomRoles.Refugee) && player.IsAlive()) return true;
             return false;
         }
-      /*if (systemType == SystemTypes.Doors && AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay)
+        /*if (systemType == SystemTypes.Doors && AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay)
         {
             if (player.Is(CustomRoleTypes.Impostor) && !player.Is(CustomRoles.Minimalism) && (player.IsAlive() || !Options.DeadImpCantSabotage.GetBool())) return true;
             if (player.Is(CustomRoles.Jackal) && Jackal.CanUseSabotage.GetBool()) return true;

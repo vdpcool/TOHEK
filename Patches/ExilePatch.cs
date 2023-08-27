@@ -1,12 +1,9 @@
 using AmongUs.Data;
 using HarmonyLib;
 using System.Linq;
+using TOHE.Roles.Crewmate;
 using TOHE.Roles.Impostor;
 using TOHE.Roles.Neutral;
-using AmongUs.GameOptions;
-using System;
-using System.Collections.Generic;
-using TOHE.Roles.Crewmate;
 
 namespace TOHE;
 
@@ -62,7 +59,7 @@ class ExileControllerWrapUpPatch
 
             exiled.IsDead = true;
             Main.PlayerStates[exiled.PlayerId].deathReason = PlayerState.DeathReason.Vote;
-                        var role = exiled.GetCustomRole();
+            var role = exiled.GetCustomRole();
 
             //判断冤罪师胜利
             if (Main.AllPlayerControls.Any(x => x.Is(CustomRoles.Innocent) && !x.IsAlive() && x.GetRealKiller()?.PlayerId == exiled.PlayerId))
@@ -90,6 +87,35 @@ class ExileControllerWrapUpPatch
                 DecidedWinner = true;
             }
 
+            //判断欺诈师被出内鬼胜利（被魅惑的欺诈师被出魅魔胜利 || 恋人欺诈师被出恋人胜利）
+            if (role == CustomRoles.Fraudster)
+            {
+                if (role == (CustomRoles.Charmed))
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Succubus);
+                }
+                else if (role == CustomRoles.Lovers)
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Lovers);
+                }
+                else
+                {
+                    CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Impostor);
+                }
+            }
+
+            if (Main.ForYandere.Contains(exiled.PlayerId))
+            {
+                foreach (var pc in Main.AllAlivePlayerControls)
+                {
+                    if (pc.Is(CustomRoles.Yandere))
+                    {
+                        pc.RpcMurderPlayerV3(pc);
+                    }
+                    break;
+                }
+            }
+
             //判断处刑人胜利
             if (Executioner.CheckExileTarget(exiled, DecidedWinner)) DecidedWinner = true;
             if (Lawyer.CheckExileTarget(exiled, DecidedWinner)) DecidedWinner = false;
@@ -106,6 +132,8 @@ class ExileControllerWrapUpPatch
 
         Witch.RemoveSpelledPlayer();
         HexMaster.RemoveHexedPlayer();
+        PlagueDoctor.Immunitytimes = PlagueDoctor.Immunitytime.GetInt();
+        PlagueDoctor.ImmunityGone = false;
 
         foreach (var pc in Main.AllPlayerControls)
         {
@@ -119,7 +147,7 @@ class ExileControllerWrapUpPatch
                 //RPC.RpcSyncCurseAndKill();
             }
             pc.ResetKillCooldown();
-            if (Roles.Crewmate.Snitch.SnitchHasPortableButton.GetBool() && pc.Is(CustomRoles.Snitch))
+            if (Snitch.SnitchHasPortableButton.GetBool() && pc.Is(CustomRoles.Snitch))
                 pc.RpcResetAbilityCooldown();
             if (pc.Is(CustomRoles.Warlock))
             {

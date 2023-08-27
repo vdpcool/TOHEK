@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.Collections;
 using TMPro;
+using TOHE.CustomCosmetics;
 using UnityEngine;
 using static TOHE.Translator;
 
@@ -177,6 +178,9 @@ public static class CredentialsPatch
             InitCredentialsData();
             instance = __instance;
             AmongUsClient.Instance.StartCoroutine(ViewCredentialsCoro(__instance));
+            DownLoadCustomHat.Load();
+            DownLoadClass.Load();
+            DownLoadClassVisor.Load();
         }
     }
 }
