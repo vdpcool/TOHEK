@@ -17,13 +17,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\ModNews\English\TOHE.v.2.4.2.txt"/>
+    <Resource Include="Resources\ModNews\English\TOHE.v.2.4.2.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="CustomCosmetics\CustomCosmeticsData\CustomHatData.cs~RFbacc703.TMP" />
   </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.7.11" PrivateAssets="all" />
-		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
+		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.671" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.671" />
 		<PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" />
 	</ItemGroup>
 

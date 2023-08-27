@@ -6,8 +6,11 @@ using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using TOHE.CustomCosmetics;
+using TOHE.RainbowMod;
 using TOHE.Roles.Neutral;
 using UnityEngine;
 
@@ -16,7 +19,7 @@ using UnityEngine;
 [assembly: AssemblyVersion(TOHE.Main.PluginVersion)]
 namespace TOHE;
 
-[BepInPlugin(PluginGuid, "TOHE", PluginVersion)]
+[BepInPlugin(PluginGuid, "TOHEK", PluginVersion)]
 [BepInIncompatibility("jp.ykundesu.supernewroles")]
 [BepInProcess("Among Us.exe")]
 public class Main : BasePlugin
@@ -33,15 +36,10 @@ public class Main : BasePlugin
     public static ConfigEntry<string> DebugKeyInput { get; private set; }
     public static readonly string MainMenuText = " ";
     public const string PluginGuid = "com.k.tohek";
-    public const string PluginVersion = "2.5.1";
+    public const string PluginVersion = "2.5.3";
     public const string CanaryPluginVersion = "Canary Version";
     public const int PluginCreate = 3;
     public const bool Canary = true;
-
-    public static readonly bool ShowQQButton = true;
-    public static readonly string QQInviteUrl = "https://jq.qq.com/?_wv=1027&k=2RpigaN6";
-    public static readonly bool ShowDiscordButton = true;
-    public static readonly string DiscordInviteUrl = "https://discord.gg/tohe";
 
     public Harmony Harmony { get; } = new Harmony(PluginGuid);
     public static Version version = Version.Parse(PluginVersion);
@@ -68,6 +66,13 @@ public class Main : BasePlugin
     public static ConfigEntry<bool> CanPublic { get; private set; }
     public static ConfigEntry<bool> ModeForSmallScreen { get; private set; }
     public static ConfigEntry<bool> ShowLobbyCode { get; private set; }
+    public static ConfigEntry<bool> AutoCreateRoom { get; private set; }
+    public static ConfigEntry<bool> AutoCopyGameCode { get; private set; }
+    public static ConfigEntry<bool> DownloadNewNamePlates { get; private set; }
+    public static ConfigEntry<bool> IsDeleted { get; set; }
+    public static ConfigEntry<string> Ip { get; set; }
+    public static ConfigEntry<ushort> Port { get; set; }
+    public static IRegionInfo[] defaultRegions;
     public static ConfigEntry<bool> VersionCheat { get; private set; }
     public static ConfigEntry<bool> GodMode { get; private set; }
 
@@ -102,9 +107,9 @@ public class Main : BasePlugin
     public static List<(string, byte, string)> MessagesToSend = new();
     public static bool isChatCommand = false;
     public static List<PlayerControl> LoversPlayers = new();
-    public static List<PlayerControl> seniormanagementPlayers = new();
+    public static List<PlayerControl> SeniormanagementPlayers = new();
     public static bool isLoversDead = true;
-    public static bool isseniormanagementDead = true;
+    public static bool IsSeniormanagementDead = true;
     public static Dictionary<byte, float> AllPlayerKillCooldown = new();
     public static Dictionary<byte, Vent> LastEnteredVent = new();
     public static Dictionary<byte, Vector2> LastEnteredVentLocation = new();
@@ -183,6 +188,22 @@ public class Main : BasePlugin
     public static Dictionary<byte, int> ManipulatorNeutral = new();
     public static Dictionary<byte, string> ManipulatorNotify = new();
     public static Dictionary<byte, int> CrushMax = new();
+    public static Dictionary<byte, long> ForNnurse = new();
+    public static List<byte> NnurseHelep = new();
+    public static Dictionary<byte, int> NnurseHelepMax = new();
+    public static Dictionary<byte, long> HemophobiaInKill = new();
+    public static List<byte> ForHemophobia = new();
+    public static Dictionary<byte, int> BullKillMax = new();
+    public static List<byte> BurstBodies = new();
+    public static Dictionary<byte, int> NecromancerRevenged = new();
+    public static List<byte> NeedKillYandere = new();
+    public static List<byte> ForYandere = new();
+    public static List<byte> FakeMath = new();
+    public static List<byte> ForFake = new();
+    public static Dictionary<byte,byte> NeedFake = new();
+    public static Dictionary<byte, int> FakeMax = new();
+    public static List<byte> NotKiller = new();
+    public static Dictionary<byte, int> TomKill = new();
     public static Dictionary<(byte, byte), bool> isDoused = new();
     public static Dictionary<(byte, byte), bool> isDraw = new();
     public static Dictionary<(byte, byte), bool> isRevealed = new();
@@ -232,6 +253,7 @@ public class Main : BasePlugin
 
     public static Dictionary<byte, CustomRoles> DevRole = new();
     public static byte ShamanTarget = byte.MaxValue;
+    public static bool ShamanTargetChoosen = false;
 
     public static IEnumerable<PlayerControl> AllPlayerControls => PlayerControl.AllPlayerControls.ToArray().Where(p => p != null);
     public static IEnumerable<PlayerControl> AllAlivePlayerControls => PlayerControl.AllPlayerControls.ToArray().Where(p => p != null && p.IsAlive() && !p.Data.Disconnected && !Pelican.IsEaten(p.PlayerId));
@@ -268,9 +290,25 @@ public class Main : BasePlugin
         DumpLog = Config.Bind("Client Options", "DumpLog", false);
         CanPublic = Config.Bind("Client Options", "CanPublic", false);
         ModeForSmallScreen = Config.Bind("Client Options", "ModeForSmallScreen", false);
-        ShowLobbyCode = Config.Bind("Client Options", "ShowLobbyCode", false);
+        ShowLobbyCode = Config.Bind("Client Options", "ShowLobbyCode", true);
+        AutoCreateRoom = Config.Bind("Client Options", "AutoCreateRoom", true);
+        AutoCopyGameCode = Config.Bind("Client Options", "AutoCopyGameCode", true);
+        DownloadNewNamePlates = Config.Bind("Client Option", "DownloadNewNamePlates", false);
+        IsDeleted = Config.Bind("Client Option", "IsDeleted", false);
+        if (!IsDeleted.Value)
+        {
+            if (Directory.Exists(Path.GetDirectoryName(Application.dataPath) + @"\TOHEK\") && Directory.Exists(Path.GetDirectoryName(Application.dataPath) + @"\TOHEK\CustomHatsChache\"))
+            {
+                DirectoryInfo di = new(Path.GetDirectoryName(Application.dataPath) + @"\TOHEK\CustomHatsChache\");
+                di.Delete(true);
+            }
+            IsDeleted.Value = true;
+        }
         VersionCheat = Config.Bind("Client Options", "VersionCheat", false);
         GodMode = Config.Bind("Client Options", "GodMode", false);
+
+        Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
+        Port = Config.Bind("Custom", "Custom Server Port", (ushort)22023);
 
         Logger = BepInEx.Logging.Logger.CreateLogSource("TOHEK");
         TOHE.Logger.Enable();
@@ -397,7 +435,6 @@ public class Main : BasePlugin
                 {CustomRoles.Indomitable,"#808000" },
                 {CustomRoles.GlennQuagmire,"#FF3333" },
                 {CustomRoles.ChiefOfPolice,"#f8cd46" },
-                {CustomRoles.CrewSchrodingerCat,"#ffffff" },
                 {CustomRoles.Prophet,"#FFCC99" },
                 {CustomRoles.Scout,"#6666CC" },
                 {CustomRoles.ElectOfficials,"#99CCCC" },
@@ -406,6 +443,11 @@ public class Main : BasePlugin
                 {CustomRoles.Undercover,"#ff1919" },
                 {CustomRoles.Mascot,"#00ff66" },
                 {CustomRoles.Manipulator,"#FF3300" },
+                {CustomRoles.Nurse,"#99CCFF" },
+                {CustomRoles.EIReverso,"#663366" },
+                {CustomRoles.Fugitive,"#FF9900" },
+                {CustomRoles.SpeedUp,"#669966" },
+                {CustomRoles.Tom,"#87CEFA" },
                 {CustomRoles.NBakery, "#b58428"},
                 {CustomRoles.ONBakery, "#f19801"},
                 //第三陣営役職
@@ -434,14 +476,19 @@ public class Main : BasePlugin
                 {CustomRoles.CovenLeader, "#663399"},
                 {CustomRoles.SourcePlague, "#CCCC33"},
                 {CustomRoles.PlaguesGod, "#101010"},
-                {CustomRoles.SchrodingerCat,"#666666" },
-                {CustomRoles.GamerSchrodingerCat,"#68bc71" },
-                {CustomRoles.BloodSchrodingerCat,"#630000" },
-                {CustomRoles.JSchrodingerCat,"#00b4eb" },
-                {CustomRoles.YLSchrodingerCat,"#6A5ACD" },
-                {CustomRoles.PGSchrodingerCat, "#101010"},
-                {CustomRoles.DHSchrodingerCat, "#483d8b"},
-                {CustomRoles.OKSchrodingerCat, "#CC6600"},
+                {CustomRoles.Bull ,"#339900" },
+                {CustomRoles.Banshee, "#663399"},
+                {CustomRoles.Necromancer, "#663399"},
+                {CustomRoles.Seeker, "#ffaa00"},
+                {CustomRoles.Romantic, "#FF1493"},
+                {CustomRoles.VengefulRomantic, "#8B0000"},
+                {CustomRoles.RuthlessRomantic, "#D2691E"},
+                {CustomRoles.Refugee, "#ff1919"},
+                {CustomRoles.PlagueDoctor, "#feb92d"},
+                {CustomRoles.Yandere, "#ff00ff" },
+                {CustomRoles.Fake,"#333333" },
+                {CustomRoles.SchrodingerCat, "#666666" },
+                {CustomRoles.RewardOfficer,"#669966" },
                 {CustomRoles.God, "#f96464"},
                 {CustomRoles.Opportunist, "#4dff4d"},
                 {CustomRoles.OpportunistKiller, "#CC6600"},
@@ -514,6 +561,15 @@ public class Main : BasePlugin
                 {CustomRoles.OldThousand,"#f6f657" },
                 {CustomRoles.Antidote,"#FF9876"},
                 {CustomRoles.Diseased, "#AAAAAA"},
+                {CustomRoles.Sigma, "#00FF00"},
+                {CustomRoles.Revenger, "#00ffff"},
+                {CustomRoles.Fategiver,"#FFB6C1" },
+                {CustomRoles.Burst, "#B619B9"},
+                {CustomRoles.Energizer,"#9900FF" },
+                {CustomRoles.Involution,"#708090"},
+                {CustomRoles.Wanderers,"#3399FF" },
+                {CustomRoles.Rambler, "#99CCFF"},
+                {CustomRoles.Executor,"#CCCC00" },
                 {CustomRoles.Brakar, "#1447af"},
                 {CustomRoles.Oblivious, "#424242"},
                 {CustomRoles.Bewilder, "#c894f5"},
@@ -522,7 +578,7 @@ public class Main : BasePlugin
                 {CustomRoles.Avanger, "#ffab1c"},
                 {CustomRoles.Youtuber, "#fb749b"},
                 {CustomRoles.Egoist, "#5600ff"},
-                {CustomRoles.seniormanagement, "#0089ff"},
+                {CustomRoles.Seniormanagement, "#0089ff"},
                 {CustomRoles.Believer, "#000000"},
                 {CustomRoles.TicketsStealer, "#ff1919"},
                 {CustomRoles.DualPersonality, "#3a648f"},
@@ -582,6 +638,8 @@ public class Main : BasePlugin
         SpamManager.Init();
         DevManager.Init();
         Cloud.Init();
+        CustomColors.Load();
+        ClassInjector.RegisterTypeInIl2Cpp<RainbowBehaviour>();
 
         IRandom.SetInstance(new NetRandomWrapper());
 
@@ -669,15 +727,20 @@ public enum CustomRoles
     Deathpact,
     Devourer,
     EvilDiviner,
+    Visionary,
     Morphling,
     Twister,
-    ImpostorSchrodingerCat,
     Vandalism,
     Disorder,
     DemolitionManiac,
     QX,
     Guide,
     Depressed,
+    Hemophobia,
+    SpecialAgent,
+    Fraudster,
+    Refugee,
+    Blackmailer,
     //Crewmate(Vanilla)
     Engineer,
     GuardianAngel,
@@ -752,7 +815,6 @@ public enum CustomRoles
     Indomitable,
     GlennQuagmire,
     ChiefOfPolice,
-    CrewSchrodingerCat,
     Prophet,
     Scout,
     ElectOfficials,
@@ -761,6 +823,11 @@ public enum CustomRoles
     Undercover,
     Mascot,
     Manipulator,
+    Nurse,
+    EIReverso,
+    Fugitive,
+    SpeedUp,
+    Tom,
     Bakery,
     NBakery,
     ONBakery,
@@ -790,14 +857,18 @@ public enum CustomRoles
     CovenLeader,
     SourcePlague,
     PlaguesGod,
+    Bull,
+    Banshee,
+    Necromancer,
+    Seeker,
+    Romantic,
+    VengefulRomantic,
+    RuthlessRomantic,
+    PlagueDoctor,
+    Yandere,
+    Fake,
     SchrodingerCat,
-    GamerSchrodingerCat,
-    BloodSchrodingerCat,
-    JSchrodingerCat,
-    YLSchrodingerCat,
-    PGSchrodingerCat,
-    DHSchrodingerCat,
-    OKSchrodingerCat,
+    RewardOfficer,
     Jackal,
     Poisoner,
     NWitch,
@@ -868,11 +939,19 @@ public enum CustomRoles
     VIP,
     Loyal,
     EvilSpirit,
-    Visionary,
     Bitch,
     OldThousand,
     Antidote,
     Diseased,
+    Sigma,
+    Revenger,
+    Fategiver,
+    Burst,
+    Energizer,
+    Involution,
+    Wanderers,
+    Rambler,
+    Executor,
     Brakar,
     Oblivious,
     Bewilder,
@@ -882,7 +961,7 @@ public enum CustomRoles
     Sidekick,
     Youtuber,
     Egoist,
-    seniormanagement,
+    Seniormanagement,
     Believer,
     TicketsStealer,
     DualPersonality,
@@ -970,7 +1049,13 @@ public enum CustomWinner
     Masochism = CustomRoles.Masochism,
     Coven = CustomRoles.CovenLeader,
     PlagueBearer = CustomRoles.PlagueBearer,
-    PlaguesGod = CustomRoles.PlaguesGod
+    PlaguesGod = CustomRoles.PlaguesGod,
+    Bull = CustomRoles.Bull,
+    Seeker = CustomRoles.Seeker,
+    RuthlessRomantic = CustomRoles.RuthlessRomantic,
+    PlagueDoctor = CustomRoles.PlagueDoctor,
+    Yandere = CustomRoles.Yandere,
+    RewardOfficer = CustomRoles.RewardOfficer,
 }
 public enum AdditionalWinners
 {
@@ -981,6 +1066,9 @@ public enum AdditionalWinners
     FreeMan = CustomRoles.FreeMan,
     Shaman = CustomRoles.Shaman,
     QSR = CustomRoles.QSR,
+    Romantic = CustomRoles.Romantic,
+    VengefulRomantic = CustomRoles.VengefulRomantic,
+    RuthlessRomantic = CustomRoles.RuthlessRomantic,
     Executioner = CustomRoles.Executioner,
     Slaveowner = CustomRoles.Slaveowner,
     Lawyer = CustomRoles.Lawyer,
@@ -994,8 +1082,6 @@ public enum AdditionalWinners
     Pursuer = CustomRoles.Pursuer,
     Phantom = CustomRoles.Phantom,
     Maverick = CustomRoles.Maverick,
-    DHCat = CustomRoles.DHSchrodingerCat,
-    OKC = CustomRoles.OKSchrodingerCat,
 }
 public enum SuffixModes
 {
